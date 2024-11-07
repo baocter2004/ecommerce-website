@@ -48,6 +48,7 @@ class ProductController extends Controller
                 ->route('admin.products.index')
                 ->with('success', true);
         } catch (\Throwable $th) {
+            // return back()->withErrors($th->getMessage());
             return back()->with('success', false);
         }
     }
@@ -123,6 +124,44 @@ class ProductController extends Controller
                 ->with('success', true);
         } catch (\Throwable $th) {
             //throw $th;
+            return back()->with('success', false);
+        }
+    }
+
+    public function trash()
+    {
+        $trashList = Product::onlyTrashed()->latest('id')->paginate(5);
+
+        return view('admin.products.trash', compact('trashList'));
+    }
+
+    public function forceDestroy($id)
+    {
+        try {
+            $product = Product::onlyTrashed()->findOrFail($id);
+            $product->forceDelete();
+            if (Storage::exists($product->product_image)) {
+                Storage::delete($product->product_image);
+            }
+            return redirect()
+                ->route('admin.products.trash')
+                ->with('success', true);
+        } catch (\Throwable $th) {
+            return back()->with('success', false);
+        }
+    }
+
+    public function restore($id)
+    {
+        try {
+            $product = Product::onlyTrashed()->findOrFail($id);
+
+            // dd($product);
+            $product->restore();
+            return redirect()
+                ->route('admin.products.index')
+                ->with('success', true);
+        } catch (\Throwable $th) {
             return back()->with('success', false);
         }
     }

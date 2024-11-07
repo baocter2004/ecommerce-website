@@ -4,6 +4,16 @@
 @endsection
 
 @section('content')
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
     <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="row">
@@ -88,8 +98,7 @@
             <div class="col-md-6 mt-3 mb-3">
                 <label for="is_active" class="form-label">Is Active</label>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1"
-                        {{ old('is_active') ? 'checked' : '' }} />
+                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" />
                     <label class="form-check-label" for="is_active">Activate Product</label>
                 </div>
             </div>

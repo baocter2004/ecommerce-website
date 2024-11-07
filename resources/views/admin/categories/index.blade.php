@@ -5,6 +5,12 @@
 @endsection
 
 @section('content')
+    @if (session('success'))
+        <div class="alert alert-success">
+            Thao Tác Thành Công
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -14,16 +20,16 @@
             </ul>
         </div>
     @endif
-    @if (session()->has('success'))
-        <div class="alert alert-primary">
-            <h1>Thao Tác Thành Công</h1>
-        </div>
-    @endif
+
+    <!-- Nút tạo mới Category -->
     <div class="mt-3 mb-3">
-        <a href="{{route('admin.categories.create')}}" class="btn btn-primary">Create</a>
+        <a href="{{ route('admin.categories.create') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Create
+        </a>
     </div>
+
     <div class="table-responsive">
-        <table class="table table-striped table-hover table-borderless table-primary align-middle">
+        <table class="table table-striped table-hover table-borderless table-striped align-middle">
             <thead class="table-light">
                 <caption>
                     Danh Sách Category
@@ -39,33 +45,54 @@
             </thead>
             <tbody class="table-group-divider">
                 @foreach ($categories as $category)
-                    <tr class="table-primary">
-                        <td scope="row">{{ $category->id }}</td>
-                        <td scope="row">{{ $category->name }}</td>
-                        <td scope="row">
+                    <tr>
+                        <td>{{ $category->id }}</td>
+                        <td>{{ $category->name }}</td>
+                        <td>
                             @if ($category->is_active === 1)
-                                <span class="badge bg-primary">Yes!</span>
+                                <span class="badge bg-success">Yes!</span>
                             @else
                                 <span class="badge bg-danger">No!</span>
                             @endif
                         </td>
-                        <td scope="row">{{ $category->created_at->format('d/m/Y') }}</td>
-                        <td scope="row">{{ $category->updated_at->format('d/m/Y') }}</td>
-                        <td scope="row">
-                            <a class="btn btn-warning" href="{{ route('admin.categories.edit', $category->id) }}"><i
-                                    class="bi bi-pencil-square"></i></a>
-                            <form action="{{ route('admin.categories.destroy', $category->id) }}" method="post">
+                        <td>{{ $category->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $category->updated_at->format('d/m/Y') }}</td>
+                        <td>
+                            <!-- Chỉnh sửa -->
+                            <a class="btn btn-warning" href="{{ route('admin.categories.edit', $category->id) }}"
+                                data-bs-toggle="tooltip" title="Chỉnh Sửa">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <!-- Xóa -->
+                            <form action="{{ route('admin.categories.destroy', $category->id) }}" method="post"
+                                class="d-inline" onsubmit="return confirm('Do you want delete it?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Do you want delete it ?')" class="mt-2 btn btn-danger"><i class="bi bi-trash"></i></button>
+                                <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </form>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
-                {{ $categories->links() }}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        {{ $categories->links() }}
+                    </td>
+                </tr>
             </tfoot>
         </table>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // Kích hoạt tooltips của Bootstrap
+        var tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+@endpush

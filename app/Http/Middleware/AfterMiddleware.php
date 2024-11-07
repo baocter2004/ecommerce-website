@@ -18,8 +18,8 @@ class AfterMiddleware
     {
         $response =  $next($request);
 
-        Log::debug('AfterMiddleware',[$response]);
+        Log::debug('AfterMiddleware', [$response]);
 
-        return $next($request);
+        return $response;
     }
 }

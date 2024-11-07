@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\AuthenController;
 use App\Http\Controllers\Client\ClientController;
 
 use Illuminate\Support\Facades\Route;
+use Monolog\Handler\RotatingFileHandler;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +36,7 @@ Route::controller(AuthenController::class)
 
 // admin
 Route::prefix('admin')
-    ->middleware(['auth', 'isadmin'])
+    ->middleware(['auth','isadmin'])
     ->name('admin.')
     ->group(function () {
 
@@ -53,6 +54,10 @@ Route::prefix('admin')
                 Route::get('/{user}/edit', 'edit')->name('edit');
                 Route::put('/{user}', 'update')->name('update');
                 Route::delete('/{user}', 'destroy')->name('destroy');
+                
+                Route::get('/trash','trash')->name('trash');
+                Route::delete('{user}/forcedestroy','forceDestroy')->name('forcedestroy');
+                Route::post('{user}/restore','restore')->name('restore');
             });
 
         // Đường dẫn của CRUD categories
@@ -67,8 +72,13 @@ Route::prefix('admin')
                 Route::get('/{category}/edit', 'edit')->name('edit');
                 Route::put('/{category}', 'update')->name('update');
                 Route::delete('/{category}', 'destroy')->name('destroy');
+
+                Route::get('/trash','trash')->name('trash');
+                Route::delete('{category}/forcedestroy','forceDestroy')->name('forcedestroy');
+                Route::post('{category}/restore','restore')->name('restore');
             });
 
+            
         //Đường Dẫn của CRUD products
         Route::prefix('products')
             ->name('products.')
@@ -77,23 +87,28 @@ Route::prefix('admin')
                 Route::get('/', 'index')->name('index');
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
-                Route::get('/{product}/show','show')->name('show');
+                Route::get('/{product}/show', 'show')->name('show');
                 Route::get('/{product}/edit', 'edit')->name('edit');
                 Route::put('/{product}', 'update')->name('update');
                 Route::delete('/{product}', 'destroy')->name('destroy');
+                
+                Route::get('/trash','trash')->name('trash');
+                Route::delete('{product}/forcedestroy','forceDestroy')->name('forcedestroy');
+                Route::post('{product}/restore','restore')->name('restore');
             });
     });
 
 
 // client
 
-Route::name('client.')->group(function () {
-    Route::get('/', [ClientController::class, 'index'])->name('index');
-    Route::get('/shop-single', [ClientController::class, 'shopSingle'])->name('shopSingle');
-    Route::get('/shop', [ClientController::class, 'shop'])->name('shop');
-    Route::get('/cart', [ClientController::class, 'cart'])->name('cart');
-    Route::get('/checkout', [ClientController::class, 'checkout'])->name('checkout');
-    Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
-    Route::get('/about', [ClientController::class, 'about'])->name('about');
-    Route::get('/thankyou', [ClientController::class, 'thankyou'])->name('thankyou');
-});
+Route::name('client.')
+    ->group(function () {
+        Route::get('/', [ClientController::class, 'index'])->name('index');
+        Route::get('/shop-single', [ClientController::class, 'shopSingle'])->name('shopSingle');
+        Route::get('/shop', [ClientController::class, 'shop'])->name('shop');
+        Route::get('/cart', [ClientController::class, 'cart'])->name('cart');
+        Route::get('/checkout', [ClientController::class, 'checkout'])->name('checkout');
+        Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
+        Route::get('/about', [ClientController::class, 'about'])->name('about');
+        Route::get('/thankyou', [ClientController::class, 'thankyou'])->name('thankyou');
+    });

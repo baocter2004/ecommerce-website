@@ -28,22 +28,22 @@ class StoreUserRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users')
+                Rule::unique('users', 'email')
             ],
             'password' => 'required|min:10|confirmed',
-            'user_name' =>[
+            'user_name' => [
                 'required',
-                Rule::unique('users')
+                Rule::unique('users', 'user_name')
             ],
             'image' => 'nullable|image|max:2048',
-            'phone' => 'required|string|max:14',
+            'phone' => 'nullable|string|max:14',
             'role' => [
                 'required',
-                Rule::in([User::ROLE_ADMIN,User::ROLE_MEMBER])
+                Rule::in([User::ROLE_ADMIN, User::ROLE_MEMBER])
             ],
             'is_active' => [
                 'nullable',
-                Rule::in([0,1])
+                Rule::in([0, 1])
             ],
         ];
     }

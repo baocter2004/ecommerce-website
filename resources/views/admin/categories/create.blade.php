@@ -25,7 +25,7 @@
             <input type="checkbox" name="is_active" class="form-check" value="1">
         </div>
         <div class="mt-3 mb-3">
-            <button type="submit" class="btn btn-primary">Thêm Mới</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i>Thêm Mới</button>
         </div>
     </form>
 @endsection

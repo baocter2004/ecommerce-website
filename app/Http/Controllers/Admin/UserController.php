@@ -26,7 +26,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('admin.users.create');
+        $roles = [User::ROLE_ADMIN, User::ROLE_MEMBER];
+        return view('admin.users.create', compact('roles'));
     }
 
     /**
@@ -36,6 +37,7 @@ class UserController extends Controller
     {
         try {
             $data = $request->except('image');
+
             if ($request->hasFile('image')) {
                 $data['image'] = Storage::put('users', $request->file('image'));
             }
@@ -63,7 +65,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        $roles = [User::ROLE_ADMIN, User::ROLE_MEMBER];
+
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -107,6 +111,44 @@ class UserController extends Controller
     {
         try {
             $user->delete();
+            return redirect()
+                ->route('admin.users.index')
+                ->with('success', true);
+        } catch (\Throwable $th) {
+            return back()->with('success', false);
+        }
+    }
+
+    public function trash()
+    {
+        $trashList = User::onlyTrashed()->latest('id')->paginate(5);
+
+        return view('admin.users.trash', compact('trashList'));
+    }
+
+    public function forceDestroy($id)
+    {
+        try {
+            $user = User::onlyTrashed()->findOrFail($id);
+            $user->forceDelete();
+            if (Storage::exists($user->image)) {
+                Storage::delete($user->image);
+            }
+            return redirect()
+                ->route('admin.users.trash')
+                ->with('success', true);
+        } catch (\Throwable $th) {
+            return back()->with('success', false);
+        }
+    }
+
+    public function restore($id)
+    {
+        try {
+            $user = User::onlyTrashed()->findOrFail($id);
+
+            // dd($user);
+            $user->restore();
             return redirect()
                 ->route('admin.users.index')
                 ->with('success', true);
