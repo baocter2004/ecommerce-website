@@ -56,22 +56,20 @@
                         <td>{{ $user->created_at->format('Y/m/d') }}</td>
                         <td>{{ $user->updated_at->format('Y/m/d') }}</td>
                         <td>
-                            <!-- Xem -->
-                            <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-info"
-                                data-bs-toggle="tooltip" title="Xem Chi Tiết">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <!-- Chỉnh sửa -->
-                            <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-warning"
-                                data-bs-toggle="tooltip" title="Chỉnh Sửa">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            <!-- Xóa -->
-                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="post" class="d-inline"
-                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">
+                            <form action="{{ route('admin.users.restore', $product->id) }}" method="post" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-warning" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Khôi Phục">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </form>
+                            
+                            <form action="{{ route('admin.users.forcedestroy', $product->id) }}" method="post"
+                                class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Xóa">
+                                <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" title="Xóa Vĩnh Viễn">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -82,7 +80,7 @@
             <tfoot>
                 <tr>
                     <td colspan="11" class="text-center">
-                        {{ $users->links() }}
+                        {{ $trashList->links() }}
                     </td>
                 </tr>
             </tfoot>

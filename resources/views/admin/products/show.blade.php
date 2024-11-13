@@ -40,6 +40,18 @@
                                 <span class="badge {{ $value ? 'bg-primary' : 'bg-danger' }}">
                                     {{ $value ? 'Yes' : 'No' }}
                                 </span>
+                            @elseif ($key === 'variants')
+                                @foreach ($product->variants as $variant)
+                                    <div>
+                                        <strong>Variant: {{ $variant->name }}</strong>
+                                        <ul>
+                                            @foreach ($variant->options as $option)
+                                                <li>Option: - {{ $option->option }}</li>
+                                                <li>Price Modifier: - {{ $option->price_modifier }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
                             @else
                                 {{ is_array($value) ? implode(', ', $value) : $value }}
                             @endif

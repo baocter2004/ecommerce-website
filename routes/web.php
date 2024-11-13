@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Auth\AuthenController;
 use App\Http\Controllers\Client\ClientController;
 
@@ -36,7 +37,7 @@ Route::controller(AuthenController::class)
 
 // admin
 Route::prefix('admin')
-    ->middleware(['auth','isadmin'])
+    ->middleware(['auth', 'isadmin'])
     ->name('admin.')
     ->group(function () {
 
@@ -47,6 +48,8 @@ Route::prefix('admin')
             ->name('users.')
             ->controller(UserController::class)
             ->group(function () {
+                Route::get('/trash', 'trash')->name('trash');
+
                 Route::get('/', 'index')->name('index');
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
@@ -54,10 +57,9 @@ Route::prefix('admin')
                 Route::get('/{user}/edit', 'edit')->name('edit');
                 Route::put('/{user}', 'update')->name('update');
                 Route::delete('/{user}', 'destroy')->name('destroy');
-                
-                Route::get('/trash','trash')->name('trash');
-                Route::delete('{user}/forcedestroy','forceDestroy')->name('forcedestroy');
-                Route::post('{user}/restore','restore')->name('restore');
+
+                Route::delete('{user}/forcedestroy', 'forceDestroy')->name('forcedestroy');
+                Route::post('{user}/restore', 'restore')->name('restore');
             });
 
         // Đường dẫn của CRUD categories
@@ -73,12 +75,12 @@ Route::prefix('admin')
                 Route::put('/{category}', 'update')->name('update');
                 Route::delete('/{category}', 'destroy')->name('destroy');
 
-                Route::get('/trash','trash')->name('trash');
-                Route::delete('{category}/forcedestroy','forceDestroy')->name('forcedestroy');
-                Route::post('{category}/restore','restore')->name('restore');
+                Route::get('/trash', 'trash')->name('trash');
+                Route::delete('{category}/forcedestroy', 'forceDestroy')->name('forcedestroy');
+                Route::post('{category}/restore', 'restore')->name('restore');
             });
 
-            
+
         //Đường Dẫn của CRUD products
         Route::prefix('products')
             ->name('products.')
@@ -91,10 +93,22 @@ Route::prefix('admin')
                 Route::get('/{product}/edit', 'edit')->name('edit');
                 Route::put('/{product}', 'update')->name('update');
                 Route::delete('/{product}', 'destroy')->name('destroy');
-                
-                Route::get('/trash','trash')->name('trash');
-                Route::delete('{product}/forcedestroy','forceDestroy')->name('forcedestroy');
-                Route::post('{product}/restore','restore')->name('restore');
+
+                Route::get('/trash', 'trash')->name('trash');
+                Route::delete('{product}/forcedestroy', 'forceDestroy')->name('forcedestroy');
+                Route::post('{product}/restore', 'restore')->name('restore');
+            });
+
+        Route::prefix('products/{product}/variants')
+            ->name('products.variants.')
+            ->controller(VariantController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+                Route::get('/{variant}/edit', 'edit')->name('edit');
+                Route::put('/{variant}', 'update')->name('update');
+                Route::delete('/{variant}', 'destroy')->name('destroy');
             });
     });
 

@@ -1,7 +1,7 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Danh Sách Products
+    Danh Sách Sản Phẩm
 @endsection
 
 @section('content')
@@ -26,15 +26,27 @@
         <i class="bi bi-plus-circle"></i> Tạo Mới
     </a>
 
+    <!-- Thanh tìm kiếm -->
+    <form action="{{ route('admin.products.index') }}" method="GET" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm sản phẩm..."
+                value="{{ request()->search }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+        </div>
+    </form>
+
     <div class="table-responsive">
-        <table class="table table-striped table-hover table-borderless align-middle">
-            <thead class="table-light">
+        <table class="table table-striped table-hover table-borderless table-sm align-middle text-center">
+            <thead class="thead-dark">
                 <caption>Danh Sách Products</caption>
                 <tr>
                     <th>ID</th>
                     <th>Tên Sản Phẩm</th>
                     <th>Danh Mục</th>
                     <th>Giá</th>
+                    <th>Variant</th>
                     <th>Ảnh Sản Phẩm</th>
                     <th>Mô Tả</th>
                     <th>Mô Tả Ngắn</th>
@@ -52,18 +64,32 @@
                         <td>{{ $product->category->name }}</td>
                         <td>{{ number_format($product->price, 0, ',', '.') }} VND</td>
                         <td>
-                            <img src="{{ Storage::url($product->product_image) }}" class="img-fluid rounded"
-                                alt="Chưa có Ảnh" style="max-height: 80px; object-fit: cover;" />
+                            @foreach ($product->variants as $variant)
+                                @if ($variant->name === 'Size')
+                                    <span class="badge bg-secondary">{{ $variant->name }}:</span>
+                                    @foreach ($variant->options as $option)
+                                        <span class="badge bg-light text-dark mt-2">
+                                            {{ $option->option }} -
+                                            {{ number_format($option->price_modifier, 0, ',', '.') }} VND
+                                        </span>
+                                    @endforeach
+                                @endif
+                            @endforeach
+                        </td>
+                        <td>
+                            <img src="{{ Storage::url($product->product_image) }}" class="img-fluid rounded shadow-sm"
+                                alt="Chưa có Ảnh" width="400px" />
                         </td>
                         <td>
                             {{ Str::limit($product->description, 50) }}
                             @if (strlen($product->description) > 50)
-                                <a href="{{ route('admin.products.show', $product->id) }}" class="text-primary">Xem Thêm</a>
+                                <a href="{{ route('admin.products.show', $product->id) }}" class="text-primary">Xem
+                                    Thêm</a>
                             @endif
                         </td>
                         <td>
-                            {{ Str::limit($product->short_description, 50) }}
-                            @if (strlen($product->short_description) > 50)
+                            {{ Str::limit($product->short_description, 20) }}
+                            @if (strlen($product->short_description) > 20)
                                 <a href="{{ route('admin.products.show', $product->id) }}" class="text-primary">Xem
                                     Thêm</a>
                             @endif
@@ -78,22 +104,24 @@
                         <td>{{ $product->created_at->format('Y/m/d') }}</td>
                         <td>{{ $product->updated_at->format('Y/m/d') }}</td>
                         <td>
-                            <!-- Xem -->
-                            <a href="{{ route('admin.products.show', $product) }}" class="btn btn-info"
+                            <a href="{{ route('admin.products.show', $product) }}" class="btn btn-info mt-2"
                                 data-bs-toggle="tooltip" title="Xem Chi Tiết">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <!-- Chỉnh sửa -->
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning"
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning mt-2"
                                 data-bs-toggle="tooltip" title="Chỉnh Sửa">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <!-- Xóa -->
+                            <a href="{{ route('admin.products.variants.index', $product->id) }}"
+                                class="btn btn-primary mt-2" data-bs-toggle="tooltip" title="Xem Biến Thể">
+                                <i class="bi bi-box"></i>
+                            </a>
                             <form action="{{ route('admin.products.destroy', $product) }}" method="post" class="d-inline"
                                 onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Xóa">
+                                <button type="submit" class="btn btn-danger mt-2 mb-2" data-bs-toggle="tooltip"
+                                    title="Xóa">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -103,8 +131,10 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="11" class="text-center">
-                        {{ $products->links() }}
+                    <td colspan="12" class="text-center">
+                        <div class="d-flex justify-content-center">
+                            {{ $products->links() }}
+                        </div>
                     </td>
                 </tr>
             </tfoot>

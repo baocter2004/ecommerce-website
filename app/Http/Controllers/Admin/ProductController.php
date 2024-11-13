@@ -16,8 +16,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('category')->latest('id')->paginate(5);
-
+        $products = Product::with('category','variants.options')->latest('id')->paginate(5);
+        // dd($products);
         return view('admin.products.index', compact('products'));
     }
 
@@ -58,7 +58,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category:name,id']);
+        $product->load(['category:name,id','variants.options:variant_id,price_modifier,option']);
 
         return view('admin.products.show', compact('product'));
     }
