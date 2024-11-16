@@ -26,16 +26,21 @@
         <i class="bi bi-plus-circle"></i> Tạo Mới
     </a>
 
-    <!-- Thanh tìm kiếm -->
-    <form action="{{ route('admin.products.index') }}" method="GET" class="mb-3">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm sản phẩm..."
-                value="{{ request()->search }}">
-            <button class="btn btn-primary" type="submit">
-                <i class="bi bi-search"></i> Tìm kiếm
-            </button>
+    <form action="{{ route('admin.products.search') }}" method="GET" class="mt-3 mb-3 row">
+        <div class="col-4">
+            <input type="text" class="form-control" name="search_products" placeholder="Tìm kiếm sản phẩm hoặc danh mục">
         </div>
+
+        <div class="col-4">
+            <select name="search_type" class="form-control">
+                <option value="product">Tìm theo tên sản phẩm</option>
+                <option value="category">Tìm theo danh mục</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
     </form>
+
 
     <div class="table-responsive">
         <table class="table table-striped table-hover table-borderless table-sm align-middle text-center">
@@ -77,8 +82,8 @@
                             @endforeach
                         </td>
                         <td>
-                            <img src="{{ Storage::url($product->product_image) }}" class="img-fluid rounded shadow-sm"
-                                alt="Chưa có Ảnh" width="400px" />
+                            <img src="{{ Storage::url($product->product_image) }}" class="img-thumbnail" alt="Chưa có Ảnh"
+                                style="width: 300px; height: auto;" />
                         </td>
                         <td>
                             {{ Str::limit($product->description, 50) }}
@@ -132,13 +137,17 @@
             <tfoot>
                 <tr>
                     <td colspan="12" class="text-center">
-                        <div class="d-flex justify-content-center">
+                        <div class="d-flex justify-content-center mt-3 mb-2">
                             {{ $products->links() }}
                         </div>
                     </td>
                 </tr>
             </tfoot>
         </table>
+        @if ($products->isEmpty())
+            <p class="text-center" style="color: red">Không tìm thấy sản phẩm nào với từ khóa
+                "{{ request()->input('search_products') }}".</p>
+        @endif
     </div>
 @endsection
 

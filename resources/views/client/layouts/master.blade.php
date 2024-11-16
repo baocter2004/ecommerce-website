@@ -21,8 +21,9 @@
 
         </header>
 
-        @yield('content')
-
+        <div class="mt-6 mb-2">
+            @yield('content')
+        </div>
         <footer class="site-footer border-top">
             @include('client.layouts.partials.footer')
         </footer>

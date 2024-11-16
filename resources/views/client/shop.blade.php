@@ -4,8 +4,9 @@
     <div class="bg-light py-3">
         <div class="container">
             <div class="row">
-                <div class="col-md-12 mb-0"><a href="index.html">Home</a> <span class="mx-2 mb-0">/</span> <strong
-                        class="text-black">Shop</strong></div>
+                <div class="col-md-12 mb-0"><a href="{{ route('client.index') }}">Home</a> <span class="mx-2 mb-0">/</span>
+                    <strong class="text-black">Shop</strong>
+                </div>
             </div>
         </div>
     </div>
@@ -29,9 +30,17 @@
                                         Latest
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-                                        <a class="dropdown-item" href="#">Men</a>
-                                        <a class="dropdown-item" href="#">Women</a>
-                                        <a class="dropdown-item" href="#">Children</a>
+                                        @foreach ($categories as $category)
+                                            <a class="dropdown-item"
+                                                href="{{ route('client.shop', ['category_id' => $category->id]) }}"
+                                                {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </a>
+                                        @endforeach
+                                        <a class="dropdown-item" href="{{ route('client.shop') }}"
+                                            {{ request('category_id') == '' ? 'selected' : '' }}>
+                                            Tất cả danh mục
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="btn-group">
@@ -50,179 +59,60 @@
                         </div>
                     </div>
                     <div class="row mb-5">
+                        @foreach ($products as $product)
+                            <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                                <div class="block-4 text-center border">
+                                    <figure class="block-4-image">
+                                        <a href="{{ route('client.shop-single', $product->id) }}"><img
+                                                src="{{ Storage::url($product->product_image) }}" alt="Image placeholder"
+                                                class="img-fluid"></a>
+                                    </figure>
+                                    <div class="block-4-text p-4">
+                                        <h3>
+                                            <a
+                                                href="{{ route('client.shop-single', $product->id) }}">{{ Str::limit($product->product_name, 15) }}</a>
+                                        </h3>
+                                        <p class="mb-0">{{ Str::limit($product->short_description, 25) }}</p>
+                                        <p class="text-primary font-weight-bold">
+                                            @php
+                                                // Khởi tạo các biến giá trị tối thiểu và tối đa từ giá biến thể
+                                                $minPrice = null;
+                                                $maxPrice = null;
 
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_1.jpg" alt="Image placeholder"
-                                            class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Tank Top</a></h3>
-                                    <p class="mb-0">Finding perfect t-shirt</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/shoe_1.jpg" alt="Image placeholder"
-                                            class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Corater</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_2.jpg" alt="Image placeholder"
-                                            class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Polo Shirt</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
+                                                // Duyệt qua các variant và tìm giá nhỏ nhất và lớn nhất từ options
+                                                foreach ($product->variants as $variant) {
+                                                    foreach ($variant->options as $option) {
+                                                        if ($minPrice === null || $option->price_modifier < $minPrice) {
+                                                            $minPrice = $option->price_modifier;
+                                                        }
+                                                        if ($maxPrice === null || $option->price_modifier > $maxPrice) {
+                                                            $maxPrice = $option->price_modifier;
+                                                        }
+                                                    }
+                                                }
+                                            @endphp
 
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_3.jpg" alt="Image placeholder"
-                                            class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">T-Shirt Mockup</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
+                                            @if ($minPrice !== null && $maxPrice !== null)
+                                                <span class="badge bg-light text-dark">
+                                                    Giá: {{ number_format($minPrice + $product->price, 0, ',', '.') }} VND
+                                                    -
+                                                    {{ number_format($maxPrice + $product->price, 0, ',', '.') }} VND
+                                                </span>
+                                            @else
+                                                <span class="badge bg-light text-dark">
+                                                    Giá: {{ number_format($product->price, 0, ',', '.') }} VND
+                                                </span>
+                                            @endif
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/shoe_1.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Corater</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_1.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Tank Top</a></h3>
-                                    <p class="mb-0">Finding perfect t-shirt</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/shoe_1.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Corater</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_2.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Polo Shirt</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_3.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">T-Shirt Mockup</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/shoe_1.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Corater</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_1.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Tank Top</a></h3>
-                                    <p class="mb-0">Finding perfect t-shirt</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                            <div class="block-4 text-center border">
-                                <figure class="block-4-image">
-                                    <a href="shop-single.html"><img src="/client/images/cloth_2.jpg"
-                                            alt="Image placeholder" class="img-fluid"></a>
-                                </figure>
-                                <div class="block-4-text p-4">
-                                    <h3><a href="shop-single.html">Polo Shirt</a></h3>
-                                    <p class="mb-0">Finding perfect products</p>
-                                    <p class="text-primary font-weight-bold">$50</p>
-                                </div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                     <div class="row" data-aos="fade-up">
                         <div class="col-md-12 text-center">
                             <div class="site-block-27">
-                                <ul>
-                                    <li><a href="#">&lt;</a></li>
-                                    <li class="active"><span>1</span></li>
-                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                    <li><a href="#">4</a></li>
-                                    <li><a href="#">5</a></li>
-                                    <li><a href="#">&gt;</a></li>
-                                </ul>
+                                {{ $products->links() }}
                             </div>
                         </div>
                     </div>
@@ -243,8 +133,8 @@
                         <div class="mb-4">
                             <h3 class="mb-3 h6 text-uppercase text-black d-block">Filter by Price</h3>
                             <div id="slider-range" class="border-primary"></div>
-                            <input type="text" name="text" id="amount"
-                                class="form-control border-0 pl-0 bg-white" disabled="" />
+                            <input type="text" name="text" id="amount" class="form-control border-0 pl-0 bg-white"
+                                disabled="" />
                         </div>
 
                         <div class="mb-4">

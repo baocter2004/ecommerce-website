@@ -751,3 +751,7 @@ a {
   width: 120px;
   border-radius: 50%;
   margin-bottom: 20px; }
+  .navbar .navbar-brand {
+    font-size: 2.5rem; /* Làm logo lớn hơn */
+    text-align: center; /* Đảm bảo logo căn giữa */
+}

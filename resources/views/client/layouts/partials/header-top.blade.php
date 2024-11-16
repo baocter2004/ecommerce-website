@@ -1,52 +1,43 @@
-<nav class="site-navbar-top bg-light shadow-sm fixed-top">
+<!-- Navbar Top Section -->
+<div class="site-navbar-top">
     <div class="container">
         <div class="row align-items-center">
 
-            <div class="col-12 col-md-4 order-2 order-md-1 site-search-icon text-left position-relative">
-                <form action="" class="site-block-top-search">
-                    <div class="input-group">
-                        <button class="btn btn-secondary" type="submit">
-                            <span class="icon icon-search2"></span>
-                        </button>
-                        <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm..." aria-label="Search">
-                    </div>
+            <!-- Search Bar (Left) -->
+            <div class="col-12 col-md-4 d-flex justify-content-center align-items-center mb-3 mb-md-0">
+                <form action="{{ route('client.search') }}" method="GET" class="d-flex w-100 p-2 bg-light rounded shadow-sm">
+                    <input type="text" name="searchKey" class="form-control border-0 rounded-start search-input" placeholder="Tìm kiếm sản phẩm..." aria-label="Tìm kiếm">
+                    <button class="btn btn-secondary rounded-end search-button" type="submit">
+                        <span class="icon icon-search2"></span>
+                    </button>
                 </form>
             </div>
 
-            <div class="col-12 mb-3 mb-md-0 col-md-4 order-1 order-md-2 text-center">
+            <!-- Logo (Center) -->
+            <div class="col-12 col-md-4 text-center mb-3 mb-md-0">
                 <div class="site-logo">
                     <a href="{{ route('client.index') }}" class="js-logo-clone text-dark fs-3 fw-bold">Shoppers</a>
                 </div>
             </div>
 
-            <div class="col-12 col-md-4 order-3 text-end">
+            <!-- Icons (Right) -->
+            <div class="col-12 col-md-4 text-center text-md-end">
                 <div class="site-top-icons">
-                    <ul class="list-unstyled d-flex justify-content-end align-items-center mb-0">
-                        <li class="me-3">
-                            <a href="#" aria-label="Yêu thích" class="text-dark">
-                                <span class="icon icon-heart-o"></span>
-                            </a>
-                        </li>
-
-                        <li class="me-3 position-relative">
-                            <a href="cart.html" class="text-dark" aria-label="Giỏ hàng">
-                                <span class="icon icon-shopping_cart"></span>
-                                <span
-                                    class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">2</span>
-                            </a>
-                        </li>
-
+                    <ul class="d-flex justify-content-center justify-content-md-end align-items-center">
+                        <!-- User Icon -->
                         <li class="me-3 nav-item dropdown">
                             @if (Auth::check())
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="icon icon-person"></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li class="text-center">
                                         <strong>XIN CHÀO, {{ Str::limit(Auth::user()->name, 16) }}</strong>
                                     </li>
-                                    <li><a href="#" class="dropdown-item">Trang cá nhân</a></li>
+                                    <li><a href="#" class="dropdown-item">profile</a></li>
+                                    @if (Auth::user()->isAdmin())
+                                        <li><a href="#" class="dropdown-item">Admin panel</a></li>
+                                    @endif
                                     <li>
                                         <form action="{{ route('logout') }}" method="post" class="mb-0">
                                             @csrf
@@ -55,9 +46,8 @@
                                     </li>
                                 </ul>
                             @else
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="loginDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="icon icon-person"></span> Đăng nhập/Đăng ký
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="icon icon-person"></span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loginDropdown">
                                     <li><a href="{{ route('login') }}" class="dropdown-item">Đăng nhập</a></li>
@@ -66,26 +56,27 @@
                             @endif
                         </li>
 
-                        <li class="d-inline-block d-md-none">
-                            <a href="#" class="site-menu-toggle js-menu-toggle">
-                                <span class="icon icon-menu"></span>
+                        <!-- Wishlist Icon -->
+                        <li class="me-3"><a href="#"><span class="icon icon-heart-o"></span></a></li>
+
+                        <!-- Cart Icon -->
+                        <li>
+                            <a href="cart.html" class="site-cart">
+                                <span class="icon icon-shopping_cart"></span>
+                                <span class="count">2</span>
                             </a>
                         </li>
                     </ul>
                 </div>
             </div>
 
+            <!-- Mobile Menu Toggle -->
+            <div class="col-12 d-md-none text-end">
+                <a href="#" class="site-menu-toggle js-menu-toggle">
+                    <span class="icon-menu"></span>
+                </a>
+            </div>
+
         </div>
     </div>
-</nav>
-<style>
-    body {
-        padding-top: 70px;
-        /* Duy trì khoảng cách cho nội dung phía dưới thanh điều hướng cố định */
-    }
-
-    .site-navbar-top {
-        transition: background-color 0.3s;
-        /* Hiệu ứng chuyển màu nền */
-    }
-</style>
+</div>

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -31,5 +30,9 @@ class Product extends Model
 
     public function variants() {
         return $this->hasMany(Variant::class);
+    }
+
+    public function views() {
+        return $this->hasMany(View::class);
     }
 }

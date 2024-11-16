@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -16,7 +17,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('category','variants.options')->latest('id')->paginate(5);
+        $products = Product::with('category', 'variants.options')->latest('id')->paginate(5);
         // dd($products);
         return view('admin.products.index', compact('products'));
     }
@@ -58,7 +59,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category:name,id','variants.options:variant_id,price_modifier,option']);
+        $product->load(['category:name,id', 'variants.options:variant_id,price_modifier,option']);
 
         return view('admin.products.show', compact('product'));
     }
@@ -164,5 +165,33 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             return back()->with('success', false);
         }
+    }
+
+    public function search(Request $request)
+    {
+        // Lấy từ khóa tìm kiếm từ input
+        $searchKey = $request->input('search_products');
+        // lựa chọn kiểu tìm kiếm (danh mục - mô tả sp , tên sp)
+        $searchType = $request->input('search_type');
+        if (!empty($searchKey)) {
+            if ($searchType === 'category') {
+                $products = Product::with('category:id,name')
+                    ->whereHas('category', function ($search) use ($searchKey) {
+                        $search->where('name', 'LIKE', "%{$searchKey}%");
+                    })
+                    ->latest('id')
+                    ->paginate(5);
+            } else {
+                $products = Product::where('product_name', 'LIKE', "%{$searchKey}%")
+                    ->orWhere('description', 'LIKE', "%{$searchKey}%")
+                    ->latest('id')
+                    ->paginate(5);
+            }
+            // dd($products);
+        } else {
+            $products = Product::latest('id')->paginate(5);
+        }
+
+        return view('admin.products.index', compact('products'));
     }
 }

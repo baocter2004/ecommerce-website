@@ -97,8 +97,11 @@ Route::prefix('admin')
                 Route::get('/trash', 'trash')->name('trash');
                 Route::delete('{product}/forcedestroy', 'forceDestroy')->name('forcedestroy');
                 Route::post('{product}/restore', 'restore')->name('restore');
+
+                Route::get('/search','search')->name('search');
             });
 
+        // Đường Dẫn của variant
         Route::prefix('products/{product}/variants')
             ->name('products.variants.')
             ->controller(VariantController::class)
@@ -116,13 +119,16 @@ Route::prefix('admin')
 // client
 
 Route::name('client.')
+->controller(ClientController::class)
     ->group(function () {
-        Route::get('/', [ClientController::class, 'index'])->name('index');
-        Route::get('/shop-single', [ClientController::class, 'shopSingle'])->name('shopSingle');
-        Route::get('/shop', [ClientController::class, 'shop'])->name('shop');
-        Route::get('/cart', [ClientController::class, 'cart'])->name('cart');
-        Route::get('/checkout', [ClientController::class, 'checkout'])->name('checkout');
-        Route::get('/contact', [ClientController::class, 'contact'])->name('contact');
-        Route::get('/about', [ClientController::class, 'about'])->name('about');
-        Route::get('/thankyou', [ClientController::class, 'thankyou'])->name('thankyou');
+        Route::get('/', 'index')->name('index');
+        Route::get('/{product}/shop-single', 'shopSingle')->name('shop-single');
+        Route::get('/shop', 'shop')->name('shop');
+        Route::get('/cart', 'cart')->name('cart');
+        Route::get('/checkout', 'checkout')->name('checkout');
+        Route::get('/contact', 'contact')->name('contact');
+        Route::get('/about', 'about')->name('about');
+        Route::get('/thankyou', 'thankyou')->name('thankyou');
+
+        Route::get('/search','search')->name('search');
     });
