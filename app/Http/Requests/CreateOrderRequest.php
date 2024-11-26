@@ -24,7 +24,7 @@ class CreateOrderRequest extends FormRequest
     {
         return [
             'shipping_address' => 'required|string|max:255',
-            'appartment' => 'nullable|string|max:255',
+            'appartment' => 'required|string|max:255',
             'payment_method' => [
                 'required',
                 'string'

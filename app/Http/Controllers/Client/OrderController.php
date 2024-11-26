@@ -66,6 +66,8 @@ class OrderController extends Controller
                 'order_status' => 'pending'
             ];
 
+            // dd($orderData , session()->getId());
+
             // Tạo đơn hàng
             $order = Order::create($orderData);
 
@@ -102,7 +104,7 @@ class OrderController extends Controller
             // Ghi log lỗi
             Log::error('Tạo đơn hàng thất bại: ' . $th->getMessage());
 
-            return redirect()->back()->withErrors($th->getMessage());
+            // return redirect()->back()->withErrors($th->getMessage());
 
             // Thông báo lỗi cho người dùng
             return redirect()->route('client.checkout')->with('error', 'Có lỗi xảy ra trong quá trình tạo đơn hàng, vui lòng thử lại.');
