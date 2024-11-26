@@ -14,11 +14,15 @@
             </ul>
         </div>
     @endif
-    <form action="{{ route('admin.categories.store') }}" method="POST">
+    <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="mt-3 mb-3">
             <label for="name">Name</label>
             <input type="text" name="name" class="form-control form-control-sm" value="{{ old('name') }}">
+        </div>
+        <div class="mt-3 mb-3">
+            <label for="category_image">category_image</label>
+            <input type="file" name="category_image" class="form-control form-control-sm">
         </div>
         <div class="mb-3">
             <label for="check">is_active</label>

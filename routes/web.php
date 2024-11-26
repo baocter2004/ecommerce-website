@@ -6,8 +6,9 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Auth\AuthenController;
+use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
-
+use App\Http\Controllers\Client\OrderController;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\RotatingFileHandler;
 
@@ -98,7 +99,7 @@ Route::prefix('admin')
                 Route::delete('{product}/forcedestroy', 'forceDestroy')->name('forcedestroy');
                 Route::post('{product}/restore', 'restore')->name('restore');
 
-                Route::get('/search','search')->name('search');
+                Route::get('/search', 'search')->name('search');
             });
 
         // Đường Dẫn của variant
@@ -119,16 +120,22 @@ Route::prefix('admin')
 // client
 
 Route::name('client.')
-->controller(ClientController::class)
+    ->controller(ClientController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{product}/shop-single', 'shopSingle')->name('shop-single');
         Route::get('/shop', 'shop')->name('shop');
-        Route::get('/cart', 'cart')->name('cart');
-        Route::get('/checkout', 'checkout')->name('checkout');
+
+        Route::get('/cart', [CartController::class, 'index'])->name('cart');
+        Route::post('/cart/{productId}', [CartController::class, 'addProduct'])->name('cart.add');
+        // Route::patch('/cart/{cartItemId}', [CartController::class, 'updateQuantity'])->name('cart.update');
+        Route::delete('/cart/{cartItemId}', [CartController::class, 'removeProduct'])->name('cart.remove');
+
+        Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+        Route::post('/checkout', [OrderController::class, 'createOrder'])->name('order.create');
+
         Route::get('/contact', 'contact')->name('contact');
         Route::get('/about', 'about')->name('about');
         Route::get('/thankyou', 'thankyou')->name('thankyou');
-
-        Route::get('/search','search')->name('search');
+        Route::get('/search', 'search')->name('search');
     });

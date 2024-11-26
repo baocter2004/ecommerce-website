@@ -23,4 +23,8 @@ class Variant extends Model
     {
         return $this->hasMany(VariantOption::class);
     }
+
+    public function items() {
+        return $this->hasMany(CartItem::class);
+    }
 }

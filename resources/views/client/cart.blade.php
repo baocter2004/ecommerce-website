@@ -13,7 +13,7 @@
     <div class="site-section">
         <div class="container">
             <div class="row mb-5">
-                <form class="col-md-12" method="post">
+                <div class="col-md-12" method="post">
                     <div class="site-blocks-table">
                         <table class="table table-bordered">
                             <thead>
@@ -27,65 +27,49 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td class="product-thumbnail">
-                                        <img src="/client/images/cloth_1.jpg" alt="Image" class="img-fluid">
-                                    </td>
-                                    <td class="product-name">
-                                        <h2 class="h5 text-black">Top Up T-Shirt</h2>
-                                    </td>
-                                    <td>$49.00</td>
-                                    <td>
-                                        <div class="input-group mb-3" style="max-width: 120px;">
-                                            <div class="input-group-prepend">
-                                                <button class="btn btn-outline-primary js-btn-minus"
-                                                    type="button">&minus;</button>
-                                            </div>
-                                            <input type="text" class="form-control text-center" value="1"
-                                                placeholder="" aria-label="Example text with button addon"
-                                                aria-describedby="button-addon1">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-outline-primary js-btn-plus"
-                                                    type="button">&plus;</button>
-                                            </div>
-                                        </div>
+                                @foreach ($cart_items as $cart_item)
+                                    <tr>
+                                        <td class="product-thumbnail">
+                                            <img src="{{ Storage::url($cart_item->product->product_image) }}" alt="Image"
+                                                class="img-fluid">
+                                        </td>
+                                        <td class="product-name">
+                                            <h2 class="h5 text-black">{{ $cart_item->product->product_name }}</h2>
+                                        </td>
+                                        <td>{{ number_format($cart_item->price, 0, ',', '.') }} VND</td>
+                                        <td>
 
-                                    </td>
-                                    <td>$49.00</td>
-                                    <td><a href="#" class="btn btn-primary btn-sm">X</a></td>
-                                </tr>
-
-                                <tr>
-                                    <td class="product-thumbnail">
-                                        <img src="/client/images/cloth_2.jpg" alt="Image" class="img-fluid">
-                                    </td>
-                                    <td class="product-name">
-                                        <h2 class="h5 text-black">Polo Shirt</h2>
-                                    </td>
-                                    <td>$49.00</td>
-                                    <td>
-                                        <div class="input-group mb-3" style="max-width: 120px;">
-                                            <div class="input-group-prepend">
-                                                <button class="btn btn-outline-primary js-btn-minus"
-                                                    type="button">&minus;</button>
+                                            <div class="input-group mb-3" style="max-width: 120px;">
+                                                <div class="input-group-prepend">
+                                                    <button class="btn btn-outline-primary js-btn-minus"
+                                                        type="button">&minus;</button>
+                                                </div>
+                                                <input type="text" class="form-control text-center"
+                                                    value="{{ $cart_item->quantity }}" name="quantity" placeholder=""
+                                                    aria-label="Quantity">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-primary js-btn-plus"
+                                                        type="button">&plus;</button>
+                                                </div>
                                             </div>
-                                            <input type="text" class="form-control text-center" value="1"
-                                                placeholder="" aria-label="Example text with button addon"
-                                                aria-describedby="button-addon1">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-outline-primary js-btn-plus"
-                                                    type="button">&plus;</button>
-                                            </div>
-                                        </div>
+                                        </td>
+                                        <td>{{ number_format($cart_item->price * $cart_item->quantity, 0, ',', '.') }}
+                                            VND</td>
+                                        <td>
+                                            <form action="{{ route('client.cart.remove', $cart_item->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger mt-2"
+                                                    onclick="return confirm('Do You Want to Delete this Item?')">X</button>
+                                            </form>
 
-                                    </td>
-                                    <td>$49.00</td>
-                                    <td><a href="#" class="btn btn-primary btn-sm">X</a></td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
-                </form>
+                </div>
             </div>
 
             <div class="row">
@@ -95,7 +79,8 @@
                             <button class="btn btn-primary btn-sm btn-block">Update Cart</button>
                         </div>
                         <div class="col-md-6">
-                            <button class="btn btn-outline-primary btn-sm btn-block">Continue Shopping</button>
+                            <a href="{{ route('client.shop') }}" class="btn btn-outline-primary btn-sm btn-block">Continue
+                                Shopping</a>
                         </div>
                     </div>
                     <div class="row">
@@ -124,7 +109,7 @@
                                     <span class="text-black">Subtotal</span>
                                 </div>
                                 <div class="col-md-6 text-right">
-                                    <strong class="text-black">$230.00</strong>
+                                    <strong id="subtotal-price" class="text-black">$230.00</strong>
                                 </div>
                             </div>
                             <div class="row mb-5">
@@ -132,14 +117,16 @@
                                     <span class="text-black">Total</span>
                                 </div>
                                 <div class="col-md-6 text-right">
-                                    <strong class="text-black">$230.00</strong>
+                                    <strong id="total-price" class="text-black">$230.00</strong>
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-12">
-                                    <button class="btn btn-primary btn-lg py-3 btn-block"
-                                        onclick="window.location='checkout.html'">Proceed To Checkout</button>
+                                    <button class="btn btn-primary btn-lg py-3 btn-block" type="submit"
+                                        onclick="window.location='{{ route('client.checkout') }}'">
+                                        Proceed To Checkout
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -148,4 +135,12 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var subtotalPrice = document.getElementById('subtotal-price');
+            var totalPrice = document.getElementById('total-price');
+
+            console.log(subtotalPrice, totalPrice);
+        })
+    </script>
 @endsection

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
@@ -33,35 +34,43 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $request->validate([
             'name' => [
                 'required',
-                Rule::unique('categories','name')
+                Rule::unique('categories', 'name')
             ],
             'is_active' => [
                 'nullable',
                 Rule::in([0, 1])
+            ],
+            'category_image' => [
+                'nullable',
+                'image',
+                'max:2048'
             ]
         ]);
 
-        $data['is_active'] = $request->has('is_active') ? 1 : 0;
-
-        // dd($data);
-
         try {
-            Category::create($data);
+
+            $data = $request->except('category_image');
+
+            if ($request->hasFile('category_image')) {
+                $data['category_image'] = Storage::put('categories', $request->file('category_image'));
+            }
+
+            Category::query()->create($data);
+
             // Sau khi thành công, điều hướng về trang danh sách danh mục
+
             return redirect()
                 ->route('admin.categories.index')
                 ->with('success', 'Category created successfully!');
         } catch (\Throwable $th) {
-            dd($th->getMessage());
+            // dd($th->getMessage());
             // Nếu gặp lỗi, điều hướng về lại trang tạo mới và báo lỗi
             return back()->withErrors(['error' => 'An error occurred while creating the category.'])->withInput();
         }
     }
-
-
 
     /**
      * Display the specified resource.
@@ -84,7 +93,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        $data = $request->validate([
+        $request->validate([
             'name' => [
                 'required',
                 Rule::unique('categories')->ignore($category->id)
@@ -92,16 +101,36 @@ class CategoryController extends Controller
             'is_active' => [
                 'nullable',
                 Rule::in([0, 1])
+            ],
+            'category_image' => [
+                'nullable',
+                'image',
+                'max:2048'
             ]
         ]);
 
         try {
             $data['is_active'] = isset($data['is_active']) ? 1 : 0;
 
+            $data = $request->except('category_image');
+
+            if ($request->hasFile('category_image')) {
+                $data['category_image'] = Storage::put('categories', $request->file('category_image'));
+            }
+
+            $oldImage = $category->category_image;
+            
             $category->update($data);
 
+            if (
+                $request->hasFile('category_image')
+                && !empty($oldImage)
+                && Storage::exists($oldImage)
+            ) {
+                Storage::delete($oldImage);
+            }
             return redirect()
-                ->route('admin.categories.edit',$category)
+                ->route('admin.categories.edit', $category)
                 ->with('success', true);
         } catch (\Throwable $th) {
             return back()->with('success', false);
@@ -123,13 +152,15 @@ class CategoryController extends Controller
         }
     }
 
-    public function trash () {
+    public function trash()
+    {
         $trashList = Category::onlyTrashed()->latest('id')->paginate(5);
 
-        return view('admin.categories.trash',compact('trashList'));
+        return view('admin.categories.trash', compact('trashList'));
     }
 
-    public function forceDestroy($id) {
+    public function forceDestroy($id)
+    {
         try {
             $category = Category::onlyTrashed()->findOrFail($id);
             $category->forceDelete();
@@ -141,7 +172,8 @@ class CategoryController extends Controller
         }
     }
 
-    public function restore($id) {
+    public function restore($id)
+    {
         try {
             $category = Category::onlyTrashed()->findOrFail($id);
 

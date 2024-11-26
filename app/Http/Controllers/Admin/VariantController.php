@@ -108,20 +108,20 @@ class VariantController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $productId, string $variantId)
     {
         // Validate dữ liệu
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'options' => 'required|array|min:1',
-            'options.*.name' => 'required|string|max:255',
+            'options.*.option' => 'required|string|max:255',
             'options.*.price_modifier' => 'nullable|numeric|min:0',
         ]);
 
         try {
+            $product = Product::findOrFail($productId);
             // Tìm biến thể theo ID
-            $variant = Variant::findOrFail($id);
-
+            $variant = $product->variants()->findOrFail($variantId);
             // Cập nhật tên biến thể
             $variant->update([
                 'name' => $validatedData['name'],
@@ -132,7 +132,7 @@ class VariantController extends Controller
 
             foreach ($validatedData['options'] as $option) {
                 $variant->options()->create([
-                    'option' => $option['name'],
+                    'option' => $option['option'],
                     'price_modifier' => $option['price_modifier'] ?? 0,
                 ]);
             }
@@ -140,7 +140,8 @@ class VariantController extends Controller
             // Điều hướng sau khi cập nhật thành công
             return redirect()->route('admin.products.show', $variant->product_id)->with('success', 'Variant updated successfully!');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()]);
+            dd($e->getMessage());
+            return back()->withErrors($e->getMessage());
         }
     }
 
@@ -154,7 +155,7 @@ class VariantController extends Controller
             $product = Product::findOrFail($product_id);
 
             $variant = $product->variants()->findOrFail($variant_id);
-            
+
             $variant->options()->delete();
             $variant->delete();
 

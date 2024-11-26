@@ -5,7 +5,18 @@
 @endsection
 
 @section('content')
-    <form action="{{ route('admin.products.variants.update', [$product->id, $variant->id]) }}" method="POST">
+
+@if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('admin.products.variants.update', ['product' => $product->id, 'variant' => $variant->id]) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="row">
@@ -26,6 +37,7 @@
                 <label for="variant-options" class="form-label">Variant Options</label>
                 <div id="variant-options">
                     @foreach ($variant->options as $key => $option)
+                    {{ $key }} - {{$option}}
                         <div class="option-group">
                             <input type="text" class="form-control mb-2" name="options[{{ $key }}][option]"
                                 placeholder="Option (e.g., Red)" value="{{ old('options.' . $key . '.option', $option->option) }}">
@@ -34,7 +46,7 @@
                         </div>
                     @endforeach
                 </div>
-                <button type="button" id="add-option" class="btn btn-secondary mt-2">Add Option</button>
+                {{-- <button type="button" id="add-option" class="btn btn-secondary mt-2">Add Option</button> --}}
             </div>
         </div>
 
@@ -45,18 +57,4 @@
             </div>
         </div>
     </form>
-
-    <script>
-        let optionIndex = {{ $variant->options->count() }};
-        document.getElementById('add-option').addEventListener('click', function () {
-            let optionGroup = document.createElement('div');
-            optionGroup.classList.add('option-group');
-            optionGroup.innerHTML = `
-                <input type="text" class="form-control mb-2" name="options[${optionIndex}][option]" placeholder="Option (e.g., Red)">
-                <input type="number" class="form-control mb-2" name="options[${optionIndex}][price_modifier]" placeholder="Price Modifier" step="0.01">
-            `;
-            document.getElementById('variant-options').appendChild(optionGroup);
-            optionIndex++;
-        });
-    </script>
 @endsection

@@ -16,7 +16,7 @@ class ClientController extends Controller
             ->latest('id')
             ->limit(5)->get();
 
-        $categories = Category::get(['id', 'name']);
+        $categories = Category::get(['id', 'name','category_image'])->take(3);
 
         $featured_products = $this->getFeaturedProduct(5);
 
@@ -25,6 +25,8 @@ class ClientController extends Controller
     public function shopSingle(string $id)
     {
         $product = Product::findOrFail($id);
+
+        // dd($product);
 
         if ($product) {
             View::create(['product_id' => $product->id]);

@@ -18,4 +18,7 @@ class VariantOption extends Model
     public function variant() {
         return $this->belongsTo(Variant::class);
     }
+    public function items() {
+        return $this->hasMany(CartItem::class);
+    }
 }
