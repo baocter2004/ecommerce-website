@@ -21,8 +21,11 @@
             <input type="text" name="name" class="form-control form-control-sm" value="{{ old('name') }}">
         </div>
         <div class="mt-3 mb-3">
-            <label for="category_image">category_image</label>
-            <input type="file" name="category_image" class="form-control form-control-sm">
+            <label class="form-label">Category Image</label>
+            @include('admin.components.image-upload', [
+                'name' => 'category_image',
+                'id'   => 'category_image'
+            ])
         </div>
         <div class="mb-3">
             <label for="check">is_active</label>

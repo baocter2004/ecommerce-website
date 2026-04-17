@@ -140,7 +140,6 @@ class VariantController extends Controller
             // Điều hướng sau khi cập nhật thành công
             return redirect()->route('admin.products.show', $variant->product_id)->with('success', 'Variant updated successfully!');
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return back()->withErrors($e->getMessage());
         }
     }

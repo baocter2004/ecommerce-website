@@ -12,7 +12,8 @@ class VariantOption extends Model
     protected $fillable = [
         'variant_id',
         'option',
-        'price_modifier'
+        'price_modifier',
+        'quantity',
     ];
 
     public function variant() {

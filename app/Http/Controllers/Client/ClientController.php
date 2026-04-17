@@ -16,13 +16,13 @@ class ClientController extends Controller
             ->latest('id')
             ->limit(5)->get();
 
-        $categories = Category::get(['id', 'name','category_image'])->take(3);
+        $categories = Category::get(['id', 'name', 'category_image'])->take(3);
 
-        // Lấy sản phẩm yêu thích nhất (Top Favorited)
         $featured_products = $this->getFeaturedProduct(8, 'favorites');
 
         return view('client.index', compact('products', 'featured_products', 'categories'));
     }
+
     public function shopSingle(string $id)
     {
         $product = Product::with(['category', 'variants.options', 'comments.user'])->findOrFail($id);
@@ -42,32 +42,46 @@ class ClientController extends Controller
         $keyword = $request->input('keyword');
         $min_price = $request->input('min_price');
         $max_price = $request->input('max_price');
+        $sort = $request->input('sort', 'latest');
 
         $query = Product::with(['category', 'variants.options']);
 
-        // Lọc theo danh mục
         if ($category_id) {
             $query->where('category_id', $category_id);
         }
 
-        // Tìm kiếm theo tên
         if ($keyword) {
             $query->where('product_name', 'LIKE', "%{$keyword}%");
         }
 
-        // Lọc theo khoảng giá
         if ($min_price) {
             $query->where('price', '>=', $min_price);
         }
+
         if ($max_price) {
             $query->where('price', '<=', $max_price);
         }
 
-        $products = $query->latest('id')->paginate(9);
+        switch ($sort) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'name_asc':
+                $query->orderBy('product_name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('product_name', 'desc');
+                break;
+            default:
+                $query->latest('id');
+                break;
+        }
 
+        $products = $query->paginate(9)->appends($request->all());
         $categories = Category::get(['id', 'name']);
-        
-        // Lấy sản phẩm yêu thích nhất (Top Favorited)
         $featured_products = $this->getFeaturedProduct(5, 'favorites');
 
         return view('client.shop', compact('products', 'featured_products', 'categories'));
@@ -98,31 +112,28 @@ class ClientController extends Controller
         return view('client.thankyou');
     }
 
-    public function search(Request $request) {}
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        return redirect()->route('client.shop', ['keyword' => $keyword]);
+    }
 
     public function getFeaturedProduct($limit, $type = '')
     {
-        $query = Product::query();
-        
+        $query = Product::with(['category', 'variants.options']);
+
         if ($type === 'favorites') {
-            // Lấy sản phẩm được nhiều người "Tim" nhất
             $query->withCount('favorites')->orderBy('favorites_count', 'desc');
-        } elseif ($type === 'views') {
-            $query->withCount('views')->orderBy('views_count', 'desc');
         } else {
-            $query->withCount('views')->orderBy('views_count', 'desc');
+            $query->latest('id');
         }
 
-        return $query->take($limit)->get();
-    }
+        $result = $query->limit($limit)->get();
 
-    public function getCategoryProduct($categoryId)
-    {
-        $products = Product::with(['category', 'variants.options'])
-            ->where('category_id', $categoryId)
-            ->latest('id')
-            ->paginate(6);
+        if ($result->isEmpty()) {
+            return Product::with(['category', 'variants.options'])->latest('id')->limit($limit)->get();
+        }
 
-        return $products;
+        return $result;
     }
 }

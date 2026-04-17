@@ -16,6 +16,8 @@ class User extends Authenticatable
     const ROLE_ADMIN = "admin";
     const ROLE_MEMBER = "member";
 
+    const TYPEROLE = [self::ROLE_ADMIN, self::ROLE_MEMBER];
+
     /**
      * The attributes that are mass assignable.
      *

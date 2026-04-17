@@ -68,16 +68,13 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="image" class="form-label">Ảnh đại diện</label>
-                            <input type="file" class="form-control @error('image') is-invalid @enderror" name="image" id="image" />
-                            @if($user->image)
-                                <img src="{{ Storage::url($user->image) }}" class="img-fluid rounded-top mt-2" style="max-width: 150px;" alt="User Image" />
-                            @endif
-                            @error('image')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                            @enderror
+                            <label class="form-label">Ảnh đại diện</label>
+                            @include('admin.components.image-upload', [
+                                'name' => 'image',
+                                'id'   => 'image',
+                                'preview' => $user->image,
+                                'height' => '200px'
+                            ])
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Vai trò</label>

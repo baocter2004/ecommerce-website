@@ -43,4 +43,8 @@ class Product extends Model
     public function comments() {
         return $this->hasMany(Comment::class);
     }
+
+    public function productVariants() {
+        return $this->hasMany(ProductVariant::class);
+    }
 }

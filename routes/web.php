@@ -10,6 +10,7 @@ use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Client\CommentController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\RotatingFileHandler;
@@ -156,5 +157,8 @@ Route::name('client.')
             Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
             Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
             Route::delete('/wishlist/{favorite}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+
+            // Comment routes
+            Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
         });
     });

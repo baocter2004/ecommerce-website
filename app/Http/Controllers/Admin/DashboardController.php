@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return route('admin.dashboard');
+        return redirect()->route('admin.dashboard');
     }
 
     public function dashboard()

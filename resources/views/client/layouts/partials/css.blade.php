@@ -7,7 +7,12 @@
 <link rel="stylesheet" href="/client/css/owl.carousel.min.css">
 <link rel="stylesheet" href="/client/css/owl.theme.default.min.css">
 
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <link rel="stylesheet" href="/client/css/aos.css">
 
 <link rel="stylesheet" href="/client/css/style.css">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

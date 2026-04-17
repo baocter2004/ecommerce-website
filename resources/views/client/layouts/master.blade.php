@@ -84,6 +84,12 @@
             });
         });
     </script>
+    <style>
+        /* Hide default dropdown arrow */
+        .dropdown-toggle::after {
+            display: none !important;
+        }
+    </style>
 </body>
 
 </html>

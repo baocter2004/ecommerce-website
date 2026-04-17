@@ -20,6 +20,22 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger border-0 mb-4 shadow-sm">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-warning border-0 mb-4 shadow-sm">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="row">
                 <div class="col-md-6 mb-4 mb-md-0">
                     <img src="{{ Storage::url($product->product_image) }}" alt="Image" class="img-fluid rounded shadow-sm">
@@ -110,9 +126,9 @@
                             @php
                                 $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())->where('product_id', $product->id)->exists();
                             @endphp
-                            <button type="button" class="btn btn-outline-danger btn-sm px-4 rounded-pill favorite-btn" 
+                            <button type="button" class="btn btn-outline-danger btn-sm px-4 rounded-pill favorite-btn"
                                 data-product-id="{{ $product->id }}">
-                                <i class="bi {{ $isFavorited ? 'bi-heart-fill' : 'bi-heart' }} mr-2"></i>
+                                <i class="bi {{ $isFavorited ? 'bi-heart-fill text-danger' : 'bi-heart' }} mr-2"></i>
                                 <span class="favorite-text">{{ $isFavorited ? 'ĐÃ YÊU THÍCH' : 'THÊM VÀO YÊU THÍCH' }}</span>
                             </button>
                         @else
@@ -243,20 +259,7 @@
                 updatePriceDisplay();
             });
 
-            // Chỉnh sửa ui yêu thích
-            const favBtn = document.querySelector('.favorite-btn');
-            if (favBtn) {
-                favBtn.addEventListener('click', function() {
-                    const text = this.querySelector('.favorite-text');
-                    const icon = this.querySelector('i');
-                    setTimeout(() => {
-                        const isFill = icon.classList.contains('bi-heart-fill');
-                        text.innerText = isFill ? 'ĐÃ YÊU THÍCH' : 'THÊM VÀO YÊU THÍCH';
-                    }, 500); 
-                });
-            }
-
             updatePriceDisplay();
-        });
-    </script>
+            });
+            </script>
 @endsection

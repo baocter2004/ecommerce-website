@@ -26,10 +26,13 @@
             <label for="name">Name</label>
             <input type="text" name="name" class="form-control form-control-sm" value="{{ $category->name }}">
         </div>
-        <div class="mt-3 mb-3">
-            <label for="category_image">category_image</label>
-            <input type="file" name="category_image" class="form-control form-control-sm">
-            <img src="{{ Storage::url($category->category_image) }}" class="img-fluid rounded-top" alt="" />
+        <div class="mt-3 mb-3" style="max-width: 500px;">
+            <label class="form-label">Category Image</label>
+            @include('admin.components.image-upload', [
+                'name' => 'category_image',
+                'id'   => 'category_image',
+                'preview' => $category->category_image
+            ])
         </div>
         <div class="mb-3 row">
             <label for="check">is_active</label>

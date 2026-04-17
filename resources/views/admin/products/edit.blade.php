@@ -158,19 +158,11 @@
                         </div>
                         <div class="card-body text-center">
                             <div class="mb-3">
-                                <div class="image-preview-container border rounded mb-3 d-flex align-items-center justify-content-center bg-light"
-                                    style="height: 250px; overflow: hidden;">
-                                    <img id="image-preview" src="{{ Storage::url($product->product_image) }}" alt="Preview" class="img-fluid {{ $product->product_image ? '' : 'd-none' }}" style="max-height: 100%;">
-                                    <div id="preview-placeholder" class="{{ $product->product_image ? 'd-none' : '' }}">
-                                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                                        <p class="text-muted small">Chưa có ảnh</p>
-                                    </div>
-                                </div>
-                                <input type="file" class="form-control @error('product_image') is-invalid @enderror"
-                                    name="product_image" id="product_image" accept="image/*" onchange="previewImage(this)"/>
-                                @error('product_image')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                @include('admin.components.image-upload', [
+                                    'name' => 'product_image',
+                                    'id'   => 'product_image',
+                                    'preview' => $product->product_image
+                                ])
                             </div>
                         </div>
                     </div>
@@ -203,24 +195,7 @@
         </form>
     </div>
 
-    <script>
-        // Image Preview logic
-        function previewImage(input) {
-            const preview = document.getElementById('image-preview');
-            const placeholder = document.getElementById('preview-placeholder');
-
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('d-none');
-                    placeholder.classList.add('d-none');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // Dynamic Variations logic
+    <script>        // Dynamic Variations logic
         let optionIndex = {{ $firstVariant ? $firstVariant->options->count() : 1 }};
         document.getElementById('add-option').addEventListener('click', function() {
             const container = document.getElementById('variant-options-container');

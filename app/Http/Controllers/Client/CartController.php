@@ -50,61 +50,38 @@ class CartController extends Controller
             if ($existingCartItem) {
                 $newQuantity = $existingCartItem->quantity + $quantity;
 
-                // Xử lý biến thể sản phẩm nếu có
-                $variantOption = null;
-
-                if ($request->input('option_id')) {
-                    $variantOption = VariantOption::findOrFail($request->input('option_id'));
-                }
-
-                if ($variantOption) {
-                    $totalPrice = ($product->price + $variantOption->price_modifier) * $newQuantity;
-                } else {
-                    $totalPrice = $product->price * $newQuantity;
-                }
-
-
+                // Kiểm tra tồn kho
                 if ($newQuantity > $variantOption->quantity) {
                     return redirect()->back()->with('error', 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $variantOption->quantity . ' sản phẩm.');
                 }
 
+                $totalPrice = ($product->price + $variantOption->price_modifier) * $newQuantity;
+
                 $existingCartItem->update([
                     'quantity' => $newQuantity,
-                    'price' => $totalPrice
+                    'price'    => $totalPrice
                 ]);
             } else {
-
+                // Kiểm tra tồn kho
                 if ($quantity > $variantOption->quantity) {
                     return redirect()->back()->with('error', 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $variantOption->quantity . ' sản phẩm.');
                 }
 
-                // Xử lý biến thể sản phẩm nếu có
-                $variantOption = null;
-                if ($request->input('option_id')) {
-                    $variantOption = VariantOption::findOrFail($request->input('option_id'));
-                }
-
-                if ($variantOption) {
-                    $totalPrice = ($product->price + $variantOption->price_modifier) * $quantity;
-                } else {
-                    $totalPrice = $product->price * $quantity;
-                }
+                $totalPrice = ($product->price + $variantOption->price_modifier) * $quantity;
 
                 // Tạo dữ liệu giỏ hàng
                 $cartItemData = [
-                    'product_id' => $productId,
-                    'variant_id' => $variantOption ? $variantOption->variant_id : null,
-                    'variant_option_id' => $variantOption ? $variantOption->id : null,
-                    'quantity' => $request->input('quantity', 1),
-                    'price' => $totalPrice,
+                    'product_id'        => $productId,
+                    'variant_id'        => $variantOption->variant_id,
+                    'variant_option_id' => $variantOption->id,
+                    'quantity'          => $quantity,
+                    'price'             => $totalPrice,
                 ];
-
-                // Thêm hoặc cập nhật sản phẩm trong giỏ hàng
 
                 $cart->items()->updateOrCreate(
                     [
-                        'product_id' => $productId,
-                        'variant_option_id' => $variantOption ? $variantOption->id : null,
+                        'product_id'        => $productId,
+                        'variant_option_id' => $variantOption->id,
                     ],
                     $cartItemData
                 );

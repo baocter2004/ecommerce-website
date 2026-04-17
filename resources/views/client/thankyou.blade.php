@@ -1,6 +1,12 @@
 @extends('client.layouts.master')
 
 @section('content')
+    @if (!session('success'))
+        @php
+            header('Location: ' . route('client.shop'));
+            exit();
+        @endphp
+    @endif
     <div class="bg-light py-3">
         <div class="container">
             <div class="row">

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Category::class)->constrained();
             $table->string('product_name');
-            $table->decimal('price',8,2);
+            $table->decimal('price', 15, 2);
             $table->string('product_image')->nullable();
             $table->text('description');
             $table->string('short_description')->nullable();

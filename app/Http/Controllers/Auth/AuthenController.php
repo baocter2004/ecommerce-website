@@ -46,8 +46,7 @@ class AuthenController extends Controller
 
             return redirect()->route('client.index')->with('success', true);
         } catch (\Throwable $th) {
-            // return back()->withErrors($th->getMessage());
-            return back()->with('success', false);
+            return back()->withErrors(['register' => 'Đăng ký thất bại: ' . $th->getMessage()])->withInput();
         }
     }
     public function showFormLogin()
@@ -77,7 +76,7 @@ class AuthenController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Email hoặc mật khẩu không chính xác.',
         ])->onlyInput('email');
     }
     public function logout()

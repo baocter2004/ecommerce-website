@@ -98,14 +98,12 @@
             </div>
 
             <div class="col-md-6 mt-3 mb-3">
-                <label for="image" class="form-label">User Image</label>
-                <input type="file" class="form-control @error('image') is-invalid @enderror" name="image"
-                    id="image" />
-                @error('image')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
-                    </div>
-                @enderror
+                <label class="form-label">User Image</label>
+                @include('admin.components.image-upload', [
+                    'name' => 'image',
+                    'id'   => 'image',
+                    'height' => '200px'
+                ])
             </div>
         </div>
 

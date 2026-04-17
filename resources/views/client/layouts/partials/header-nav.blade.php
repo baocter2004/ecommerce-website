@@ -8,7 +8,6 @@
             <li class="has-children">
                 <a href="{{ route('client.about') }}">About</a>
             </li>
-            <li><a href="{{ route('client.contact') }}">Contact</a></li>
         </ul>
     </div>
 </nav>

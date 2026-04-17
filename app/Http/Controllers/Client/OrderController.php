@@ -7,6 +7,7 @@ use App\Http\Requests\CreateOrderRequest;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\VariantOption;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -79,14 +80,20 @@ class OrderController extends Controller
             // Duyệt qua từng sản phẩm trong giỏ hàng và lưu vào bảng order_items
             foreach ($cart->items as $item) {
                 $orderItemData = [
-                    'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'variant_id' => $item->variant_id,
-                    'variant_option_id' => $item->variant_option_id,
+                    'order_id'         => $order->id,
+                    'product_id'       => $item->product_id,
+                    'quantity'         => $item->quantity,
+                    'price'            => $item->price,
+                    'variant_id'       => $item->variant_id,
+                    'variant_option_id'=> $item->variant_option_id,
                 ];
                 OrderItem::create($orderItemData);
+
+                // Trừ tồn kho variant option
+                if ($item->variant_option_id) {
+                    VariantOption::where('id', $item->variant_option_id)
+                        ->decrement('quantity', $item->quantity);
+                }
             }
 
             // Xóa các sản phẩm trong giỏ hàng sau khi đặt hàng

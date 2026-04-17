@@ -8,5 +8,3 @@
 <script src="/client/js/aos.js"></script>
 
 <script src="/client/js/main.js"></script>
-<!-- Bootstrap JS (nên nạp sau jQuery nếu sử dụng) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

@@ -110,9 +110,9 @@ class CategoryController extends Controller
         ]);
 
         try {
-            $data['is_active'] = isset($data['is_active']) ? 1 : 0;
-
             $data = $request->except('category_image');
+
+            $data['is_active'] = isset($data['is_active']) ? 1 : 0;
 
             if ($request->hasFile('category_image')) {
                 $data['category_image'] = Storage::put('categories', $request->file('category_image'));

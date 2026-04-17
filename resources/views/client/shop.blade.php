@@ -4,8 +4,8 @@
     <div class="bg-light py-3">
         <div class="container">
             <div class="row">
-                <div class="col-md-12 mb-0"><a href="{{ route('client.index') }}">Home</a> <span class="mx-2 mb-0">/</span>
-                    <strong class="text-black">Shop</strong>
+                <div class="col-md-12 mb-0"><a href="{{ route('client.index') }}">Trang chủ</a> <span class="mx-2 mb-0">/</span>
+                    <strong class="text-black">Cửa hàng</strong>
                 </div>
             </div>
         </div>
@@ -20,57 +20,50 @@
                     <div class="row">
                         <div class="col-md-12 mb-5">
                             <div class="float-md-left mb-4">
-                                <h2 class="text-black h5">Shop All</h2>
+                                <h2 class="text-black h5">Tất cả sản phẩm</h2>
                             </div>
-                            <div class="d-flex">
-                                <div class="dropdown mr-1 ml-md-auto">
-                                    <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
-                                        id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false">
-                                        Latest
+                            <div class="d-flex float-md-right">
+                                <div class="dropdown mr-1 ml-md-4">
+                                    <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" id="dropdownMenuOffset"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        @php
+                                            $sort = request('sort');
+                                            $labels = [
+                                                'latest' => 'Mới nhất',
+                                                'price_asc' => 'Giá thấp đến cao',
+                                                'price_desc' => 'Giá cao đến thấp',
+                                                'name_asc' => 'Tên (A -> Z)',
+                                                'name_desc' => 'Tên (Z -> A)',
+                                            ];
+                                            $currentLabel = $labels[$sort] ?? 'Mới nhất';
+                                        @endphp
+                                        Sắp xếp: {{ $currentLabel }}
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-                                        @foreach ($categories as $category)
-                                            <a class="dropdown-item"
-                                                href="{{ route('client.shop', ['category_id' => $category->id]) }}"
-                                                {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}
+                                        @foreach($labels as $key => $label)
+                                            <a class="dropdown-item" href="{{ route('client.shop', array_merge(request()->query(), ['sort' => $key, 'page' => 1])) }}">
+                                                {{ $label }}
                                             </a>
                                         @endforeach
-                                        <a class="dropdown-item" href="{{ route('client.shop') }}"
-                                            {{ request('category_id') == '' ? 'selected' : '' }}>
-                                            Tất cả danh mục
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-secondary btn-sm dropdown-toggle"
-                                        id="dropdownMenuReference" data-toggle="dropdown">Reference</button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuReference">
-                                        <a class="dropdown-item" href="#">Relevance</a>
-                                        <a class="dropdown-item" href="#">Name, A to Z</a>
-                                        <a class="dropdown-item" href="#">Name, Z to A</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Price, low to high</a>
-                                        <a class="dropdown-item" href="#">Price, high to low</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="row mb-5">
-                        @foreach ($products as $product)
+                        @forelse ($products as $product)
                             <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                                <div class="block-4 text-center border position-relative">
-                                    <div class="position-absolute" style="top: 10px; right: 10px; z-index: 10;">
+                                <div class="block-4 text-center border h-100">
+                                    <div class="p-2 d-flex justify-content-end">
                                         @auth
                                             @php
-                                                $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())->where('product_id', $product->id)->exists();
+                                                $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())
+                                                    ->where('product_id', $product->id)
+                                                    ->exists();
                                             @endphp
-                                            <button type="button" 
-                                                class="btn btn-sm btn-light rounded-circle shadow-sm favorite-btn" 
-                                                data-product-id="{{ $product->id }}"
-                                                title="{{ $isFavorited ? 'Bỏ yêu thích' : 'Yêu thích' }}">
+                                            <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm favorite-btn"
+                                                data-product-id="{{ $product->id }}" title="{{ $isFavorited ? 'Bỏ yêu thích' : 'Yêu thích' }}">
                                                 <i class="bi {{ $isFavorited ? 'bi-heart-fill text-danger' : 'bi-heart text-muted' }}"></i>
                                             </button>
                                         @else
@@ -80,14 +73,13 @@
                                         @endauth
                                     </div>
                                     <figure class="block-4-image">
-                                        <a href="{{ route('client.shop-single', $product->id) }}"><img
-                                                src="{{ Storage::url($product->product_image) }}" alt="Image placeholder"
-                                                class="img-fluid"></a>
+                                        <a href="{{ route('client.shop-single', $product->id) }}">
+                                            <img src="{{ Storage::url($product->product_image) }}" alt="Image placeholder" class="img-fluid" style="height: 200px; object-fit: contain;">
+                                        </a>
                                     </figure>
                                     <div class="block-4-text p-4">
                                         <h3 class="mb-2">
-                                            <a
-                                                href="{{ route('client.shop-single', $product->id) }}">{{ Str::limit($product->product_name, 20) }}</a>
+                                            <a href="{{ route('client.shop-single', $product->id) }}">{{ Str::limit($product->product_name, 20) }}</a>
                                         </h3>
                                         <p class="mb-2 small text-muted">{{ Str::limit($product->short_description, 30) }}</p>
                                         <p class="text-primary font-weight-bold mb-0">
@@ -114,16 +106,19 @@
                                                 </span>
                                             @else
                                                 <span class="text-dark">
-                                                    {{ number_format($product->price, 0, ',', '.') }} VND
+                                                    {{ number_format($product->price, 0, ',', '.') }}đ
                                                 </span>
                                             @endif
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-
+                        @empty
+                            <div class="col-12 text-center py-5">
+                                <p class="text-muted">Không tìm thấy sản phẩm nào phù hợp với yêu cầu của bạn.</p>
+                                <a href="{{ route('client.shop') }}" class="btn btn-primary btn-sm">Xem tất cả sản phẩm</a>
+                            </div>
+                        @endforelse
                     </div>
                     <div class="row" data-aos="fade-up">
                         <div class="col-md-12 text-center">
@@ -132,10 +127,18 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
                 <div class="col-md-3 order-1 mb-5 mb-md-0">
+                    <!-- Search Filter -->
                     <div class="border p-4 rounded mb-4">
                         <h3 class="mb-3 h6 text-uppercase text-black d-block">Tìm kiếm</h3>
                         <form action="{{ route('client.shop') }}" method="GET">
+                            @foreach(request()->query() as $key => $value)
+                                @if(!in_array($key, ['keyword', 'page']) && !is_array($value))
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
+                            @endforeach
                             <div class="input-group">
                                 <input type="text" name="keyword" class="form-control border-0 bg-light" placeholder="Tên sản phẩm..." value="{{ request('keyword') }}">
                                 <div class="input-group-append">
@@ -145,32 +148,42 @@
                         </form>
                     </div>
 
+                    <!-- Category Filter -->
                     <div class="border p-4 rounded mb-4">
                         <h3 class="mb-3 h6 text-uppercase text-black d-block">Danh mục</h3>
                         <ul class="list-unstyled mb-0">
                             @foreach ($categories as $category)
                                 <li class="mb-1">
-                                    <a href="{{ route('client.shop', ['category_id' => $category->id]) }}" class="d-flex {{ request('category_id') == $category->id ? 'text-primary font-weight-bold' : '' }}">
+                                    <a href="{{ route('client.shop', array_merge(request()->query(), ['category_id' => $category->id, 'page' => 1])) }}" 
+                                       class="d-flex {{ request('category_id') == $category->id ? 'text-primary font-weight-bold' : '' }}">
                                         <span>{{ $category->name }}</span>
                                     </a>
                                 </li>
                             @endforeach
-                            <li class="mt-2 pt-2 border-top">
-                                <a href="{{ route('client.shop') }}" class="small text-muted">Xóa lọc danh mục</a>
-                            </li>
+                            @if(request('category_id'))
+                                <li class="mt-2 pt-2 border-top">
+                                    @php
+                                        $withoutCategory = request()->query();
+                                        unset($withoutCategory['category_id'], $withoutCategory['page']);
+                                    @endphp
+                                    <a href="{{ route('client.shop', $withoutCategory) }}" class="small text-danger">
+                                        <i class="bi bi-x-circle mr-1"></i> Xóa lọc danh mục
+                                    </a>
+                                </li>
+                            @endif
                         </ul>
                     </div>
 
+                    <!-- Price Filter -->
                     <div class="border p-4 rounded mb-4">
                         <h3 class="mb-3 h6 text-uppercase text-black d-block">Lọc theo giá</h3>
                         <form action="{{ route('client.shop') }}" method="GET">
-                            @if(request('category_id'))
-                                <input type="hidden" name="category_id" value="{{ request('category_id') }}">
-                            @endif
-                            @if(request('keyword'))
-                                <input type="hidden" name="keyword" value="{{ request('keyword') }}">
-                            @endif
-                            
+                            @foreach(request()->query() as $key => $value)
+                                @if(!in_array($key, ['min_price', 'max_price', 'page']) && !is_array($value))
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
+                            @endforeach
+
                             <div class="form-group mb-2">
                                 <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Giá từ..." value="{{ request('min_price') }}">
                             </div>
@@ -185,53 +198,32 @@
                         <a href="{{ route('client.shop') }}" class="btn btn-outline-secondary btn-sm">Xóa tất cả lọc</a>
                     </div>
                 </div>
-                </div>
             </div>
 
-            <div class="row">
+            <!-- Featured Products -->
+            <div class="row mt-5 pt-5 border-top">
                 <div class="col-md-12">
                     <div class="site-section site-blocks-2">
                         <div class="row justify-content-center text-center mb-5">
                             <div class="col-md-7 site-section-heading pt-4">
-                                <h2>Categories</h2>
+                                <h2>Sản phẩm nổi bật</h2>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-6 col-md-6 col-lg-4 mb-4 mb-lg-0" data-aos="fade" data-aos-delay="">
-                                <a class="block-2-item" href="#">
+                            @foreach($featured_products as $f_product)
+                            <div class="col-sm-6 col-md-4 col-lg-3 mb-4" data-aos="fade" data-aos-delay="">
+                                <a class="block-2-item" href="{{ route('client.shop-single', $f_product->id) }}">
                                     <figure class="image">
-                                        <img src="/client/images/women.jpg" alt="" class="img-fluid">
+                                        <img src="{{ Storage::url($f_product->product_image) }}" alt="" class="img-fluid" style="height: 180px; object-fit: contain; width: 100%;">
                                     </figure>
-                                    <div class="text">
-                                        <span class="text-uppercase">Collections</span>
-                                        <h3>Women</h3>
+                                    <div class="text text-center mt-2">
+                                        <span class="text-uppercase small text-muted">{{ $f_product->category->name ?? 'Sản phẩm' }}</span>
+                                        <h3 class="h6 text-black">{{ Str::limit($f_product->product_name, 20) }}</h3>
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade" data-aos-delay="100">
-                                <a class="block-2-item" href="#">
-                                    <figure class="image">
-                                        <img src="/client/images/children.jpg" alt="" class="img-fluid">
-                                    </figure>
-                                    <div class="text">
-                                        <span class="text-uppercase">Collections</span>
-                                        <h3>Children</h3>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-sm-6 col-md-6 col-lg-4 mb-5 mb-lg-0" data-aos="fade" data-aos-delay="200">
-                                <a class="block-2-item" href="#">
-                                    <figure class="image">
-                                        <img src="/client/images/men.jpg" alt="" class="img-fluid">
-                                    </figure>
-                                    <div class="text">
-                                        <span class="text-uppercase">Collections</span>
-                                        <h3>Men</h3>
-                                    </div>
-                                </a>
-                            </div>
+                            @endforeach
                         </div>
-
                     </div>
                 </div>
             </div>
