@@ -61,10 +61,12 @@
                         icon.classList.remove('bi-heart', 'text-muted');
                         icon.classList.add('bi-heart-fill', 'text-danger');
                         btn.setAttribute('title', 'Bỏ yêu thích');
+                        if(window.Toast) window.Toast.fire({ icon: 'success', title: 'Đã thêm vào yêu thích!' });
                     } else if (data.status === 'removed') {
                         icon.classList.remove('bi-heart-fill', 'text-danger');
                         icon.classList.add('bi-heart', 'text-muted');
                         btn.setAttribute('title', 'Yêu thích');
+                        if(window.Toast) window.Toast.fire({ icon: 'info', title: ' Đã bỏ yêu thích!' });
                     }
                     
                     // Update wishlist counter in header

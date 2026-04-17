@@ -8,44 +8,51 @@ use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
-        $id = $this->segment(3);
+        $userId = $this->route('user');
+
         return [
-            'name' => 'required',
+            'name' => 'required|max:255',
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users','email')->ignore($id)
+                Rule::unique('users', 'email')->ignore($userId)
             ],
-            // 'password' => 'required|min:10|confirmed',
-            'user_name' =>[
+            'password' => 'nullable|min:8|confirmed',
+            'user_name' => [
                 'required',
-                Rule::unique('users','user_name')->ignore($id)
+                Rule::unique('users', 'user_name')->ignore($userId)
             ],
             'image' => 'nullable|image|max:2048',
             'phone' => 'nullable|string|max:14',
             'role' => [
                 'required',
-                Rule::in([User::ROLE_ADMIN,User::ROLE_MEMBER])
+                Rule::in([User::ROLE_ADMIN, User::ROLE_MEMBER])
             ],
             'is_active' => [
                 'nullable',
-                Rule::in([0,1])
+                Rule::in([0, 1])
             ],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'họ và tên',
+            'email' => 'địa chỉ email',
+            'password' => 'mật khẩu',
+            'user_name' => 'tên đăng nhập',
+            'image' => 'ảnh đại diện',
+            'phone' => 'số điện thoại',
+            'role' => 'vai trò',
+            'is_active' => 'trạng thái',
         ];
     }
 }

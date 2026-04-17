@@ -8,29 +8,21 @@ use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'name' => 'required',
+            'name' => 'required|max:255',
             'email' => [
                 'required',
                 'email',
                 Rule::unique('users', 'email')
             ],
-            'password' => 'required|min:10|confirmed',
+            'password' => 'required|min:8|confirmed',
             'user_name' => [
                 'required',
                 Rule::unique('users', 'user_name')
@@ -45,6 +37,20 @@ class StoreUserRequest extends FormRequest
                 'nullable',
                 Rule::in([0, 1])
             ],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'họ và tên',
+            'email' => 'địa chỉ email',
+            'password' => 'mật khẩu',
+            'user_name' => 'tên đăng nhập',
+            'image' => 'ảnh đại diện',
+            'phone' => 'số điện thoại',
+            'role' => 'vai trò',
+            'is_active' => 'trạng thái',
         ];
     }
 }

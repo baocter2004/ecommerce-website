@@ -7,19 +7,11 @@ use Illuminate\Validation\Rule;
 
 class CreateOrderRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -31,6 +23,17 @@ class CreateOrderRequest extends FormRequest
             ],
             'order_note' => 'nullable|string|max:500',
             'discount_code' => 'nullable|string|max:50',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'shipping_address' => 'địa chỉ giao hàng',
+            'appartment' => 'căn hộ/số nhà',
+            'payment_method' => 'phương thức thanh toán',
+            'order_note' => 'ghi chú đơn hàng',
+            'discount_code' => 'mã giảm giá',
         ];
     }
 }

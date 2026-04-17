@@ -2,29 +2,22 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            "product_name" => 'required',
-            "price" => 'required|numeric',
+            "product_name" => 'required|max:255',
+            "price" => 'required|numeric|min:0',
             "product_image" => 'nullable|image|max:2048',
             "description" => 'required',
             "short_description" => 'required',
@@ -40,6 +33,21 @@ class UpdateProductRequest extends FormRequest
             'variant_options' => 'nullable|array',
             'variant_options.*.option' => 'required_with:variant_name|string|max:255',
             'variant_options.*.price_modifier' => 'required_with:variant_name|numeric|min:0',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'product_name' => 'tên sản phẩm',
+            'price' => 'giá sản phẩm',
+            'product_image' => 'hình ảnh sản phẩm',
+            'description' => 'mô tả chi tiết',
+            'short_description' => 'mô tả ngắn',
+            'category_id' => 'danh mục',
+            'variant_name' => 'tên biến thể',
+            'variant_options.*.option' => 'giá trị biến thể',
+            'variant_options.*.price_modifier' => 'giá chênh lệch',
         ];
     }
 }

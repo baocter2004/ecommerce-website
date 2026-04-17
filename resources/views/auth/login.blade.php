@@ -3,65 +3,87 @@
     Shopper - Login
 @endsection
 @section('content')
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh; background-color: #f8f9fa;">
-    <div class="card border-0 shadow-lg p-5" style="width: 450px; border-radius: 20px;">
-        <div class="text-center mb-5">
-            <h3 class="fw-bold text-dark">Chào mừng trở lại!</h3>
-            <p class="text-muted small">Đăng nhập để tiếp tục trải nghiệm cùng Shopper</p>
+<div class="container" style="margin-top: 80px; margin-bottom: 80px;">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-light shadow-sm" style="border-radius: 0;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="text-black h3 text-uppercase font-weight-bold">Đăng nhập</h2>
+                        <div class="bg-primary mx-auto" style="width: 50px; height: 2px;"></div>
+                    </div>
+
+                    <form action="{{ route('login') }}" method="POST">
+                        @csrf
+
+                        <div class="form-group mb-3">
+                            <label for="email" class="text-black small font-weight-bold text-uppercase">Địa chỉ Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control rounded-0 @error('email') is-invalid @enderror" 
+                                   placeholder="email@example.com" value="{{ old('email') }}" id="email" name="email">
+                            @error('email')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="password" class="text-black small font-weight-bold text-uppercase">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control rounded-0 @error('password') is-invalid @enderror" 
+                                   placeholder="••••••••" id="password" name="password">
+                            @error('password')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="form-group d-flex justify-content-between align-items-center mb-4">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="remember" name="remember">
+                                <label class="custom-control-label small text-muted" for="remember">Ghi nhớ tôi</label>
+                            </div>
+                            <a href="#" class="small text-primary font-weight-bold">Quên mật khẩu?</a>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block rounded-0 text-uppercase font-weight-bold py-3" style="font-size: 13px; letter-spacing: 1px;">
+                                Đăng nhập
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="text-muted small">Bạn chưa có tài khoản? 
+                                <a href="{{ route('register') }}" class="text-primary font-weight-bold">Đăng ký tại đây</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <form action="{{ route('login') }}" method="POST">
-            @csrf
-
-            <div class="mb-4">
-                <label for="email" class="form-label small fw-bold text-secondary">Địa chỉ Email</label>
-                <div class="input-group border rounded-pill px-3 py-1 bg-light shadow-sm">
-                    <span class="input-group-text bg-transparent border-0"><i class="bi bi-envelope text-muted"></i></span>
-                    <input type="email" class="form-control bg-transparent border-0 @error('email') is-invalid @enderror" 
-                           placeholder="name@example.com" value="{{ old('email') }}" id="email" name="email">
-                </div>
-                @error('email')
-                    <div class="text-danger small mt-1 ps-3">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="mb-4">
-                <label for="password" class="form-label small fw-bold text-secondary">Mật khẩu</label>
-                <div class="input-group border rounded-pill px-3 py-1 bg-light shadow-sm">
-                    <span class="input-group-text bg-transparent border-0"><i class="bi bi-lock text-muted"></i></span>
-                    <input type="password" class="form-control bg-transparent border-0 @error('password') is-invalid @enderror" 
-                           placeholder="••••••••" id="password" name="password">
-                </div>
-                @error('password')
-                    <div class="text-danger small mt-1 ps-3">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                    <label class="form-check-label small text-muted" for="remember">Ghi nhớ tôi</label>
-                </div>
-                <a href="#" class="small text-primary text-decoration-none">Quên mật khẩu?</a>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm transition-all">
-                ĐĂNG NHẬP
-            </button>
-
-            <div class="text-center mt-5">
-                <p class="text-muted small">Chưa có tài khoản? 
-                    <a href="{{ route('register') }}" class="text-primary fw-bold text-decoration-none">Đăng ký ngay</a>
-                </p>
-            </div>
-        </form>
     </div>
 </div>
 
 <style>
-    .transition-all { transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4) !important; }
-    .input-group:focus-within { border-color: #0d6efd !important; background-color: #fff !important; }
-    input:focus { outline: none !important; box-shadow: none !important; }
+    body { background-color: #f4f7f6; }
+    .form-control {
+        border: 1px solid #e1e1e1;
+        padding: 12px 15px;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: none;
+        background-color: #fff;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+    }
+    .text-primary {
+        color: #007bff !important;
+    }
+    .bg-primary {
+        background-color: #007bff !important;
+    }
 </style>
 @endsection

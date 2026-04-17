@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -13,29 +14,9 @@ class AuthenController extends Controller
     {
         return view('auth.register');
     }
-    public function handleRegister()
+    public function handleRegister(StoreUserRequest $request)
     {
-        $data = request()->validate([
-            "name" => ['required'],
-            "email" => [
-                'required',
-                Rule::unique('users'),
-                'email'
-            ],
-            "user_name" => [
-                'required',
-                Rule::unique('users')
-            ],
-            "password" => [
-                'required',
-                'confirmed',
-                'string',
-                'min:8', // Độ dài tối thiểu
-                'regex:/[a-z]/', // Ít nhất 1 chữ cái thường
-                'regex:/[0-9]/', // Ít nhất 1 chữ số
-                'regex:/[\W_]/', // Ít nhất 1 ký tự đặc biệt
-            ],
-        ]);
+        $data = $request->validated();
 
         try {
             $user = User::query()->create($data);
