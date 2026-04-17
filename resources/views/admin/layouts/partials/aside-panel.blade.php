@@ -9,18 +9,18 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false"> <i class="menu-icon fa fa-users"></i> Users</a>
                 <ul class="sub-menu children dropdown-menu">
-                    <li><i class="bi bi-list-ul"></i><a href="{{ route('admin.users.index') }}">List Users</a></li>
-                    <li><i class="bi bi-person-plus"></i><a href="{{ route('admin.users.create') }}">Add User</a></li>
-                    <li><i class="bi bi-trash"></i><a href="{{ route('admin.users.trash') }}">Trash</a></li>
+                    <li><i class="fa fa-list-ul mr-2 text-primary"></i><a href="{{ route('admin.users.index') }}">List Users</a></li>
+                    <li><i class="fa fa-user-plus mr-2 text-success"></i><a href="{{ route('admin.users.create') }}">Add User</a></li>
+                    <li><i class="fa fa-trash-o mr-2 text-danger"></i><a href="{{ route('admin.users.trash') }}">Trash</a></li>
                 </ul>
             </li>
             <li class="menu-item-has-children dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false"> <i class="menu-icon fa fa-list"></i> Categories</a>
                 <ul class="sub-menu children dropdown-menu">
-                    <li><i class="bi bi-list-ul"></i><a href="{{ route('admin.categories.index') }}">List Categories</a></li>
-                    <li><i class="bi bi-plus-circle"></i><a href="{{ route('admin.categories.create') }}">Add Category</a></li>
-                    <li><i class="bi bi-trash"></i><a href="{{ route('admin.categories.trash') }}">Trash</a></li>
+                    <li><i class="fa fa-list-ul mr-2 text-primary"></i><a href="{{ route('admin.categories.index') }}">List Categories</a></li>
+                    <li><i class="fa fa-plus-circle mr-2 text-success"></i><a href="{{ route('admin.categories.create') }}">Add Category</a></li>
+                    <li><i class="fa fa-trash-o mr-2 text-danger"></i><a href="{{ route('admin.categories.trash') }}">Trash</a></li>
                 </ul>
             </li>
 
@@ -29,14 +29,19 @@
                     <i class="menu-icon fa fa-shopping-bag"></i> Products
                 </a>
                 <ul class="sub-menu children dropdown-menu">
-                    <li><i class="bi bi-list-ul"></i><a href="{{ route('admin.products.index') }}">List Products</a></li>
-                    <li><i class="bi bi-plus-circle"></i><a href="{{ route('admin.products.create') }}">Add Product</a></li>
-                    <li><i class="bi bi-trash"></i><a href="{{ route('admin.products.trash') }}">Trash</a></li>
+                    <li><i class="fa fa-list-ul mr-2 text-primary"></i><a href="{{ route('admin.products.index') }}">List Products</a></li>
+                    <li><i class="fa fa-plus-circle mr-2 text-success"></i><a href="{{ route('admin.products.create') }}">Add Product</a></li>
+                    <li><i class="fa fa-trash-o mr-2 text-danger"></i><a href="{{ route('admin.products.trash') }}">Trash</a></li>
                 </ul>
             </li>
             <li>
                 <a href="{{ route('admin.orders.index') }}">
                     <i class="menu-icon fa fa-shopping-cart"></i> Orders
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.comments.index') }}">
+                    <i class="menu-icon fa fa-comments"></i> Comments
                 </a>
             </li>
         </ul>

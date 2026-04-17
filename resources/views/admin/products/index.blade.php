@@ -5,153 +5,152 @@
 @endsection
 
 @section('content')
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <div class="row">
+        <div class="col-md-12">
+            @if (session()->has('success'))
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4">
+                    <i class="fa fa-check-circle mr-2"></i> Thao tác thành công!
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            @endif
 
-    @if (session()->has('success'))
-        <div class="alert alert-success">
-            <h1>Thao Tác Thành Công</h1>
-        </div>
-    @endif
+            <!-- Search Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body py-3">
+                    <form action="{{ route('admin.products.search') }}" method="GET" class="row align-items-end">
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <label class="small font-weight-bold text-muted">Từ khóa tìm kiếm</label>
+                            <input type="text" class="form-control form-control-sm shadow-sm" name="search_products" 
+                                placeholder="Tên sản phẩm hoặc danh mục..." value="{{ request('search_products') }}">
+                        </div>
+                        <div class="col-md-3 mb-2 mb-md-0">
+                            <label class="small font-weight-bold text-muted">Loại tìm kiếm</label>
+                            <select name="search_type" class="form-control form-control-sm shadow-sm">
+                                <option value="product" {{ request('search_type') == 'product' ? 'selected' : '' }}>Tìm theo tên sản phẩm</option>
+                                <option value="category" {{ request('search_type') == 'category' ? 'selected' : '' }}>Tìm theo danh mục</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-dark btn-sm btn-block shadow-sm">
+                                <i class="fa fa-search mr-1"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-    <!-- Tạo mới sản phẩm -->
-    <a href="{{ route('admin.products.create') }}" class="mt-3 mb-3 btn btn-success">
-        <i class="bi bi-plus-circle"></i> Tạo Mới
-    </a>
-
-    <form action="{{ route('admin.products.search') }}" method="GET" class="mt-3 mb-3 row">
-        <div class="col-4">
-            <input type="text" class="form-control" name="search_products" placeholder="Tìm kiếm sản phẩm hoặc danh mục">
-        </div>
-
-        <div class="col-4">
-            <select name="search_type" class="form-control">
-                <option value="product">Tìm theo tên sản phẩm</option>
-                <option value="category">Tìm theo danh mục</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-    </form>
-
-
-    <div class="table-responsive">
-        <table class="table table-striped table-hover table-borderless table-sm align-middle text-center">
-            <thead class="thead-dark">
-                <caption>Danh Sách Products</caption>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên Sản Phẩm</th>
-                    <th>Danh Mục</th>
-                    <th>Giá</th>
-                    <th>Variant</th>
-                    <th>Ảnh Sản Phẩm</th>
-                    <th>Mô Tả</th>
-                    <th>Mô Tả Ngắn</th>
-                    <th>Trạng Thái</th>
-                    <th>Ngày Tạo</th>
-                    <th>Ngày Cập Nhật</th>
-                    <th>Thao Tác</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                @foreach ($products as $product)
-                    <tr class="table-light">
-                        <td>{{ $product->id }}</td>
-                        <td>{{ $product->product_name }}</td>
-                        <td>{{ $product->category->name }}</td>
-                        <td>{{ number_format($product->price, 0, ',', '.') }} VND</td>
-                        <td>
-                            @foreach ($product->variants as $variant)
-                                <div class="mb-1">
-                                    <span class="badge badge-info">{{ $variant->name }}:</span>
-                                    <div class="d-flex flex-wrap justify-content-center">
-                                        @foreach ($variant->options as $option)
-                                            <span class="badge badge-light border m-1" data-toggle="tooltip" title="+{{ number_format($option->price_modifier, 0, ',', '.') }} VND">
-                                                {{ $option->option }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                        </td>
-                        <td>
-                            <img src="{{ Storage::url($product->product_image) }}" class="img-thumbnail shadow-sm" alt="Ảnh"
-                                style="width: 100px; height: auto;" />
-                        </td>
-                        <td>
-                            {{ Str::limit($product->description, 30) }}
-                        </td>
-                        <td>
-                            {{ Str::limit($product->short_description, 20) }}
-                        </td>
-                        <td>
-                            @if ($product->is_active === 1)
-                                <span class="badge badge-success px-3 py-2">Active</span>
-                            @else
-                                <span class="badge badge-secondary px-3 py-2">Inactive</span>
-                            @endif
-                        </td>
-                        <td class="small">{{ $product->created_at->format('Y/m/d') }}</td>
-                        <td class="small">{{ $product->updated_at->format('Y/m/d') }}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm rounded shadow-sm">
-                                <a href="{{ route('admin.products.show', $product) }}" class="btn btn-info"
-                                    data-toggle="tooltip" title="Xem Chi Tiết">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning"
-                                    data-toggle="tooltip" title="Chỉnh Sửa">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{{ route('admin.products.variants.index', $product->id) }}"
-                                    class="btn btn-primary" data-toggle="tooltip" title="Quản lý biến thể">
-                                    <i class="bi bi-box"></i>
-                                </a>
-                                <form action="{{ route('admin.products.destroy', $product) }}" method="post" class="d-inline"
-                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger" data-toggle="tooltip"
-                                        title="Xóa">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="12" class="text-center">
-                        <div class="d-flex justify-content-center mt-3 mb-2">
+            <!-- Product Table Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="m-0 font-weight-bold text-primary"><i class="fa fa-shopping-bag mr-2"></i> Danh Sách Sản Phẩm</h5>
+                    <a href="{{ route('admin.products.create') }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                        <i class="fa fa-plus-circle mr-1"></i> Thêm mới
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-dark">
+                                <tr>
+                                    <th class="border-0 pl-4">ID</th>
+                                    <th class="border-0">Sản phẩm</th>
+                                    <th class="border-0">Danh mục</th>
+                                    <th class="border-0">Giá bán</th>
+                                    <th class="border-0">Biến thể</th>
+                                    <th class="border-0">Trạng thái</th>
+                                    <th class="border-0 text-center pr-4">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($products as $product)
+                                    <tr>
+                                        <td class="pl-4 font-weight-bold">#{{ $product->id }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ Storage::url($product->product_image) }}" 
+                                                    class="rounded mr-3 border shadow-sm" alt="Ảnh"
+                                                    style="width: 50px; height: 50px; object-fit: cover;" />
+                                                <div style="max-width: 200px;">
+                                                    <div class="font-weight-bold text-dark text-truncate">{{ $product->product_name }}</div>
+                                                    <small class="text-muted text-truncate d-block">{{ $product->short_description }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-light border px-2 py-1">{{ $product->category->name }}</span></td>
+                                        <td class="text-primary font-weight-bold">{{ number_format($product->price, 0, ',', '.') }} đ</td>
+                                        <td>
+                                            @foreach ($product->variants as $variant)
+                                                <div class="mb-1">
+                                                    <small class="text-muted d-block">{{ $variant->name }}:</small>
+                                                    <div class="d-flex flex-wrap">
+                                                        @foreach ($variant->options as $option)
+                                                            <span class="badge badge-info mr-1 mb-1 p-1 small shadow-xs" 
+                                                                  data-toggle="tooltip" title="+{{ number_format($option->price_modifier, 0, ',', '.') }} đ">
+                                                                {{ $option->option }}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </td>
+                                        <td>
+                                            @if ($product->is_active === 1)
+                                                <span class="badge badge-success px-3 py-2 rounded-pill">Đang bán</span>
+                                            @else
+                                                <span class="badge badge-secondary px-3 py-2 rounded-pill">Ngừng bán</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center pr-4">
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('admin.products.show', $product) }}" 
+                                                   class="btn btn-outline-info btn-sm mx-1 rounded shadow-sm"
+                                                   data-toggle="tooltip" title="Xem chi tiết">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('admin.products.edit', $product) }}" 
+                                                   class="btn btn-outline-warning btn-sm mx-1 rounded shadow-sm"
+                                                   data-toggle="tooltip" title="Chỉnh sửa">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                                <a href="{{ route('admin.products.variants.index', $product->id) }}"
+                                                   class="btn btn-outline-primary btn-sm mx-1 rounded shadow-sm"
+                                                   data-toggle="tooltip" title="Biến thể">
+                                                    <i class="fa fa-tags"></i>
+                                                </a>
+                                                <form action="{{ route('admin.products.destroy', $product) }}" method="post" class="d-inline"
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm mx-1 rounded shadow-sm"
+                                                            data-toggle="tooltip" title="Xóa">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="fa fa-search fa-3x mb-3"></i>
+                                                <p>Không tìm thấy sản phẩm nào.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @if($products->hasPages())
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div class="d-flex justify-content-center">
                             {{ $products->links() }}
                         </div>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-        @if ($products->isEmpty())
-            <p class="text-center" style="color: red">Không tìm thấy sản phẩm nào với từ khóa
-                "{{ request()->input('search_products') }}".</p>
-        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        // Kích hoạt Bootstrap tooltips
-        var tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    </script>
-@endpush

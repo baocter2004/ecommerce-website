@@ -11,6 +11,7 @@ use App\Http\Controllers\Client\ClientController;
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\WishlistController;
 use App\Http\Controllers\Client\CommentController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\RotatingFileHandler;
@@ -126,6 +127,15 @@ Route::prefix('admin')
                 Route::get('/', 'index')->name('index');
                 Route::get('/{order}', 'show')->name('show');
                 Route::put('/{order}/status', 'updateStatus')->name('updateStatus');
+            });
+
+        // Đường dẫn quản lý Bình luận (Comments)
+        Route::prefix('comments')
+            ->name('comments.')
+            ->controller(AdminCommentController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::delete('/{comment}', 'destroy')->name('destroy');
             });
     });
 

@@ -30,7 +30,7 @@ class StoreUserRequest extends FormRequest
             'image' => 'nullable|image|max:2048',
             'phone' => 'nullable|string|max:14',
             'role' => [
-                'required',
+                request()->routeIs('admin.*') ? 'required' : 'nullable',
                 Rule::in([User::ROLE_ADMIN, User::ROLE_MEMBER])
             ],
             'is_active' => [

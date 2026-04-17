@@ -10,12 +10,13 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // Xóa dữ liệu cũ để đảm bảo sạch sẽ
         Schema::disableForeignKeyConstraints();
         ProductVariant::truncate();
         VariantOption::truncate();
@@ -23,7 +24,10 @@ class ProductSeeder extends Seeder
         Product::truncate();
         Schema::enableForeignKeyConstraints();
 
-        // Danh sách ảnh theo loại
+        if (Storage::exists('products')) {
+            Storage::deleteDirectory('products');
+        }
+        Storage::makeDirectory('products');
         $shoeImages = [
             'product-images/giaysneaker.png',
             'product-images/giaysneakermidnight.png',
@@ -59,14 +63,22 @@ class ProductSeeder extends Seeder
             $config = $categories[$catId];
             
             for ($i = 1; $i <= 10; $i++) {
-                $image = $config['images'][array_rand($config['images'])];
+                $sourceImage = $config['images'][array_rand($config['images'])];
+                $sourcePath = public_path($sourceImage);
+                
+                $finalImagePath = $sourceImage; 
+
+                if (File::exists($sourcePath)) {
+                    $finalImagePath = Storage::putFile('products', new \Illuminate\Http\File($sourcePath));
+                }
+
                 $price = rand(200, 1500) * 1000;
                 
                 $product = Product::create([
                     'product_name' => $config['prefix'] . " " . $this->getRandomName() . " " . $i,
                     'category_id' => $catId,
                     'price' => $price,
-                    'product_image' => $image,
+                    'product_image' => $finalImagePath,
                     'short_description' => "Mẫu " . strtolower($config['name']) . " cao cấp, thiết kế hiện đại, phù hợp xu hướng thời trang mới nhất.",
                     'description' => "Sản phẩm " . $config['name'] . " được làm từ chất liệu chọn lọc, mang lại cảm giác thoải mái và tự tin cho người mặc. Độ bền cao, dễ dàng phối đồ cho nhiều hoàn cảnh khác nhau.",
                     'is_active' => 1,
@@ -92,14 +104,12 @@ class ProductSeeder extends Seeder
 
     private function createVariants($product, $v1Name, $v1Options, $v2Name = null, $v2Options = [])
     {
-        $colors = [];
-        $sizes = [];
-
         $variant1 = Variant::create([
             'product_id' => $product->id,
             'name' => $v1Name
         ]);
 
+        $sizes = [];
         foreach ($v1Options as $opt) {
             VariantOption::create([
                 'variant_id' => $variant1->id,
@@ -110,6 +120,7 @@ class ProductSeeder extends Seeder
             $sizes[] = $opt;
         }
 
+        $colors = [];
         if ($v2Name) {
             $variant2 = Variant::create([
                 'product_id' => $product->id,

@@ -49,16 +49,26 @@ class ProductController extends Controller
             $product = Product::query()->create($data);
 
             if ($request->filled('variant_name') && $request->has('variant_options')) {
-                $variant = $product->variants()->create([
-                    'name' => $request->variant_name
-                ]);
-
+                $hasValidOptions = false;
                 foreach ($request->variant_options as $option) {
                     if (!empty($option['option'])) {
-                        $variant->options()->create([
-                            'option' => $option['option'],
-                            'price_modifier' => $option['price_modifier'] ?? 0
-                        ]);
+                        $hasValidOptions = true;
+                        break;
+                    }
+                }
+
+                if ($hasValidOptions) {
+                    $variant = $product->variants()->create([
+                        'name' => $request->variant_name
+                    ]);
+
+                    foreach ($request->variant_options as $option) {
+                        if (!empty($option['option'])) {
+                            $variant->options()->create([
+                                'option' => $option['option'],
+                                'price_modifier' => $option['price_modifier'] ?? 0
+                            ]);
+                        }
                     }
                 }
             }
@@ -119,22 +129,32 @@ class ProductController extends Controller
 
             // Sync Variants (Simple approach: replace if new variants are provided)
             if ($request->filled('variant_name')) {
-                // Delete old variants and their options
-                foreach ($product->variants as $v) {
-                    $v->options()->delete();
-                    $v->delete();
-                }
-
-                $variant = $product->variants()->create([
-                    'name' => $request->variant_name
-                ]);
-
+                $hasValidOptions = false;
                 foreach ($request->variant_options as $option) {
                     if (!empty($option['option'])) {
-                        $variant->options()->create([
-                            'option' => $option['option'],
-                            'price_modifier' => $option['price_modifier'] ?? 0
-                        ]);
+                        $hasValidOptions = true;
+                        break;
+                    }
+                }
+
+                if ($hasValidOptions) {
+                    // Delete old variants and their options
+                    foreach ($product->variants as $v) {
+                        $v->options()->delete();
+                        $v->delete();
+                    }
+
+                    $variant = $product->variants()->create([
+                        'name' => $request->variant_name
+                    ]);
+
+                    foreach ($request->variant_options as $option) {
+                        if (!empty($option['option'])) {
+                            $variant->options()->create([
+                                'option' => $option['option'],
+                                'price_modifier' => $option['price_modifier'] ?? 0
+                            ]);
+                        }
                     }
                 }
             }

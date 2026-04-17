@@ -38,7 +38,7 @@
 
             <div class="row">
                 <div class="col-md-6 mb-4 mb-md-0">
-                    <img src="{{ asset($product->product_image) }}" alt="Image" class="img-fluid rounded shadow-sm">
+                    <img src="{{ Storage::url($product->product_image) }}" alt="Image" class="img-fluid rounded shadow-sm">
                 </div>
                 <div class="col-md-6">
                     <h2 class="text-black font-weight-bold mb-3">{{ $product->product_name }}</h2>

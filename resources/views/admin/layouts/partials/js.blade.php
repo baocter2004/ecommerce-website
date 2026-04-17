@@ -21,3 +21,9 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.9.0/dist/fullcalendar.min.js"></script>
     <script src="{{ asset('admin-assets/assets/js/init/fullcalendar-init.js') }}"></script>
 
+    <script>
+        jQuery(document).ready(function($) {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+

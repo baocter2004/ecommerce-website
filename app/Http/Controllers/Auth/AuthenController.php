@@ -18,6 +18,10 @@ class AuthenController extends Controller
     {
         $data = $request->validated();
 
+        // Gán mặc định vai trò là thành viên và kích hoạt tài khoản
+        $data['role'] = User::ROLE_MEMBER;
+        $data['is_active'] = 1;
+
         try {
             $user = User::query()->create($data);
 
@@ -25,7 +29,7 @@ class AuthenController extends Controller
 
             request()->session()->regenerate();
 
-            return redirect()->route('client.index')->with('success', true);
+            return redirect()->route('client.index')->with('success', 'Đăng ký tài khoản thành công!');
         } catch (\Throwable $th) {
             return back()->withErrors(['register' => 'Đăng ký thất bại: ' . $th->getMessage()])->withInput();
         }

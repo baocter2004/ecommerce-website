@@ -29,11 +29,7 @@
         <div class="content">
             <!-- Animated -->
             <div class="animated fadeIn">
-
-                <h1 class="text-center mt-3 mb-3">@yield('title')</h1>
-
                 @yield('content')
-
             </div>
             <!-- .animated -->
         </div>

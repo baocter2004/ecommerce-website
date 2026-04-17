@@ -43,7 +43,7 @@
                                     <tr>
                                         <td class="product-thumbnail">
                                             <a href="{{ route('client.shop-single', $favorite->product->id) }}">
-                                                <img src="{{ asset($favorite->product->product_image) }}" alt="Image" class="img-fluid" style="max-width: 100px;">
+                                                <img src="{{ Storage::url($favorite->product->product_image) }}" alt="Image" class="img-fluid" style="max-width: 100px;">
                                             </a>
                                         </td>
                                         <td class="product-name">

@@ -96,7 +96,7 @@
                         <div class="card-header bg-white border-bottom-0 py-3 d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 font-weight-bold">Biến thể sản phẩm</h5>
                             <button type="button" class="btn btn-sm btn-outline-primary" id="add-option">
-                                <i class="bi bi-plus-lg"></i> Thêm lựa chọn
+                                <i class="fa fa-plus mr-1"></i> Thêm lựa chọn
                             </button>
                         </div>
                         <div class="card-body">
@@ -105,12 +105,45 @@
                             @endphp
                             <div class="mb-3">
                                 <label for="variant_name" class="form-label">Tên nhóm biến thể (VD: Size, Màu sắc)</label>
-                                <input type="text" class="form-control" name="variant_name" id="variant_name"
+                                <input type="text" class="form-control @error('variant_name') is-invalid @enderror" 
+                                    name="variant_name" id="variant_name"
                                     placeholder="Ví dụ: Size" value="{{ old('variant_name', $firstVariant ? $firstVariant->name : '') }}">
+                                @error('variant_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div id="variant-options-container">
-                                @if ($firstVariant && $firstVariant->options->count() > 0)
+                                @if (old('variant_options'))
+                                    @foreach (old('variant_options') as $index => $option)
+                                        <div class="row mb-2 variant-option-row">
+                                            <div class="col-md-6">
+                                                <label class="small text-muted">Giá trị</label>
+                                                <input type="text" name="variant_options[{{ $index }}][option]" 
+                                                    class="form-control @error("variant_options.$index.option") is-invalid @enderror" 
+                                                    value="{{ $option['option'] }}">
+                                                @error("variant_options.$index.option")
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="small text-muted">Phụ phí</label>
+                                                <input type="number" name="variant_options[{{ $index }}][price_modifier]" 
+                                                    class="form-control @error("variant_options.$index.price_modifier") is-invalid @enderror" 
+                                                    value="{{ $option['price_modifier'] ?? 0 }}">
+                                                @error("variant_options.$index.price_modifier")
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button type="button" class="btn btn-outline-danger w-100 remove-option" 
+                                                    {{ count(old('variant_options')) == 1 ? 'disabled' : '' }}>
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @elseif ($firstVariant && $firstVariant->options->count() > 0)
                                     @foreach ($firstVariant->options as $index => $option)
                                         <div class="row mb-2 variant-option-row">
                                             <div class="col-md-6">
@@ -183,7 +216,7 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
                             <button type="submit" class="btn btn-primary w-100 py-2 font-weight-bold">
-                                <i class="bi bi-check-circle"></i> CẬP NHẬT SẢN PHẨM
+                                <i class="fa fa-check-circle mr-1"></i> CẬP NHẬT SẢN PHẨM
                             </button>
                             <a href="{{ route('admin.products.index') }}" class="btn btn-link w-100 mt-2 text-muted text-decoration-none">
                                 Quay lại danh sách
@@ -196,7 +229,7 @@
     </div>
 
     <script>        // Dynamic Variations logic
-        let optionIndex = {{ $firstVariant ? $firstVariant->options->count() : 1 }};
+        let optionIndex = document.querySelectorAll('.variant-option-row').length;
         document.getElementById('add-option').addEventListener('click', function() {
             const container = document.getElementById('variant-options-container');
             const newRow = document.createElement('div');

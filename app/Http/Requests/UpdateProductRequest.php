@@ -31,8 +31,8 @@ class UpdateProductRequest extends FormRequest
             ],
             'variant_name' => 'nullable|string|max:255',
             'variant_options' => 'nullable|array',
-            'variant_options.*.option' => 'required_with:variant_name|string|max:255',
-            'variant_options.*.price_modifier' => 'required_with:variant_name|numeric|min:0',
+            'variant_options.*.option' => 'nullable|required_with:variant_name|string|max:255',
+            'variant_options.*.price_modifier' => 'nullable|required_with:variant_name|numeric|min:0',
         ];
     }
 

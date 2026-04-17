@@ -148,7 +148,7 @@
                 </div>
 
                 <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary btn-block py-2">
-                    <i class="bi bi-arrow-left mr-1"></i> Quay lại danh sách
+                    <i class="fa fa-arrow-left mr-1"></i> Quay lại danh sách
                 </a>
             </div>
         </div>
