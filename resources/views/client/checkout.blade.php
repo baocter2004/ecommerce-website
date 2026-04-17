@@ -34,42 +34,30 @@
                         <div class="p-4 p-lg-5 border shadow-sm rounded bg-white">
                             <div class="form-group row">
                                 <div class="col-md-12">
-                                    <label for="name" class="text-black font-weight-bold">Họ và tên <span class="text-danger">*</span></label>
+                                    <label for="name" class="text-black font-weight-bold">Họ và tên <span
+                                            class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="{{ old('name', $dataUser ? $dataUser->name : '') }}" placeholder="Nhập họ tên đầy đủ">
+                                        value="{{ old('name', $dataUser ? $dataUser->name : '') }}"
+                                        placeholder="Nhập họ tên đầy đủ">
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <div class="col-md-12">
-                                    <label for="shipping_address" class="text-black font-weight-bold">Địa chỉ giao hàng <span
-                                            class="text-danger">*</span></label>
+                                    <label for="shipping_address" class="text-black font-weight-bold">Địa chỉ giao hàng
+                                        <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="shipping_address" name="shipping_address"
                                         placeholder="Số nhà, tên đường, phường/xã..." value="{{ old('shipping_address') }}">
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label for="appartment" class="text-black font-weight-bold">Ghi chú thêm (Tùy chọn)</label>
+                                <label for="appartment" class="text-black font-weight-bold">Căn hộ / Tòa Nhà(Tùy
+                                    chọn)</label>
                                 <input type="text" class="form-control" name="appartment" id="appartment"
                                     placeholder="Tòa nhà, số tầng, vv." value="{{ old('appartment') }}">
                             </div>
 
-                            <div class="form-group row">
-                                <div class="col-md-6">
-                                    <label for="email" class="text-black font-weight-bold">Email <span
-                                            class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="email" name="email"
-                                        value="{{ old('email', $dataUser ? $dataUser->email : '') }}" placeholder="example@gmail.com">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="phone" class="text-black font-weight-bold">Số điện thoại <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="phone" name="phone"
-                                        placeholder="0123 456 789"
-                                        value="{{ old('phone', $dataUser ? $dataUser->phone : '') }}">
-                                </div>
-                            </div>
 
                             <div class="form-group">
                                 <label for="order_note" class="text-black font-weight-bold">Ghi chú đơn hàng</label>
@@ -92,7 +80,7 @@
                                         <div class="pr-3">
                                             <span class="text-black">{{ $item->product->product_name }}</span>
                                             <strong class="mx-1">x</strong> {{ $item->quantity }}
-                                            @if($item->variantOption)
+                                            @if ($item->variantOption)
                                                 <small class="text-primary d-block mt-1">
                                                     {{ $item->variant->name }}: {{ $item->variantOption->option }}
                                                 </small>
@@ -103,27 +91,29 @@
                                         </span>
                                     </div>
                                 @endforeach
-                                
+
                                 @php
                                     $orderTotal = $cart->items->sum('price');
                                 @endphp
-                                
+
                                 <div class="d-flex justify-content-between mb-3">
                                     <span class="text-black font-weight-bold">Tạm tính</span>
                                     <span class="text-black">{{ number_format($orderTotal, 0, ',', '.') }}đ</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-4">
                                     <strong class="text-black h5 font-weight-bold">Tổng cộng</strong>
-                                    <strong class="text-primary h5 font-weight-bold">{{ number_format($orderTotal, 0, ',', '.') }}đ</strong>
+                                    <strong
+                                        class="text-primary h5 font-weight-bold">{{ number_format($orderTotal, 0, ',', '.') }}đ</strong>
                                 </div>
                             </div>
 
                             <div class="form-group mb-4">
-                                <label for="payment_method" class="text-black font-weight-bold mb-2">Phương thức thanh toán</label>
+                                <label for="payment_method" class="text-black font-weight-bold mb-2">Phương thức thanh
+                                    toán</label>
                                 <select class="form-control custom-select" id="payment_method" name="payment_method">
                                     <option value="cash_payment">Thanh toán khi nhận hàng (COD)</option>
                                 </select>
-                            </div>                            
+                            </div>
 
                             <div class="form-group mt-5">
                                 <button type="submit" class="btn btn-primary btn-lg btn-block font-weight-bold py-3">

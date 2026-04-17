@@ -34,6 +34,7 @@
                                         <small class="text-muted">Xin chào,</small><br>
                                         <strong class="text-primary">{{ Str::limit(Auth::user()->name, 20) }}</strong>
                                     </div>
+                                    <a href="{{ route('client.profile.edit') }}" class="dropdown-item py-2"><i class="bi bi-person-badge mr-2"></i>Tài khoản của tôi</a>
                                     @if (Auth::user()->isAdmin())
                                         <a href="{{ route('admin.dashboard') }}" class="dropdown-item py-2"><i class="bi bi-speedometer2 mr-2"></i>Admin panel</a>
                                     @endif

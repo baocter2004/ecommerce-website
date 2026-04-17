@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class CreateOrderRequest extends FormRequest
 {
@@ -16,13 +15,12 @@ class CreateOrderRequest extends FormRequest
     {
         return [
             'shipping_address' => 'required|string|max:255',
-            'appartment' => 'required|string|max:255',
+            'appartment' => 'nullable|string|max:255',
             'payment_method' => [
                 'required',
                 'string'
             ],
             'order_note' => 'nullable|string|max:500',
-            'discount_code' => 'nullable|string|max:50',
         ];
     }
 

@@ -14,12 +14,10 @@ class CartController extends Controller
     // Hiển thị giỏ hàng của người dùng
     public function index()
     {
-        // Lấy giỏ hàng theo user hoặc session
         $cart = Auth::check()
             ? Cart::where('user_id', Auth::user()->id)->first()
             : Cart::where('session_id', session()->getId())->first();
 
-        // Lấy các sản phẩm trong giỏ hàng và eager load relationships
         $cart_items = $cart 
             ? $cart->items()->with(['product', 'variant', 'variantOption'])->get() 
             : collect();

@@ -104,20 +104,6 @@
                                 <a href="{{ route('client.shop') }}" class="btn btn-outline-primary btn-sm btn-block">TIẾP TỤC MUA SẮM</a>
                             </div>
                         </div>
-                        <div class="card border-0 shadow-sm bg-light">
-                            <div class="card-body">
-                                <label class="text-black h4 mb-3" for="coupon">Mã giảm giá</label>
-                                <p>Nhập mã giảm giá nếu bạn có.</p>
-                                <div class="row">
-                                    <div class="col-md-8 mb-3 mb-md-0">
-                                        <input type="text" class="form-control py-3" id="coupon" placeholder="Mã giảm giá">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button class="btn btn-primary btn-sm btn-block py-3">ÁP DỤNG</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div class="col-md-6 pl-md-5">
                         <div class="row justify-content-end">
