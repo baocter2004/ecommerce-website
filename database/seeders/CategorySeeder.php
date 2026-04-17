@@ -13,10 +13,10 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Giày dép', 'category_image' => 'categories/shoes.jpg', 'is_active' => true],
-            ['name' => 'Áo thời trang', 'category_image' => 'categories/shirts.jpg', 'is_active' => true],
-            ['name' => 'Quần nam/nữ', 'category_image' => 'categories/pants.jpg', 'is_active' => true],
-            ['name' => 'Phụ kiện', 'category_image' => 'categories/accessories.jpg', 'is_active' => true],
+            ['name' => 'Giày dép', 'category_image' => 'categories/shoes.png', 'is_active' => true],
+            ['name' => 'Áo thời trang', 'category_image' => 'categories/shirts.png', 'is_active' => true],
+            ['name' => 'Quần nam/nữ', 'category_image' => 'categories/pants.png', 'is_active' => true],
+            ['name' => 'Phụ kiện', 'category_image' => 'categories/accessories.png', 'is_active' => true],
         ];
 
         foreach ($categories as $cat) {

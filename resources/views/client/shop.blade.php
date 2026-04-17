@@ -74,7 +74,7 @@
                                     </div>
                                     <figure class="block-4-image">
                                         <a href="{{ route('client.shop-single', $product->id) }}">
-                                            <img src="{{ Storage::url($product->product_image) }}" alt="Image placeholder" class="img-fluid" style="height: 200px; object-fit: contain;">
+                                            <img src="{{ asset($product->product_image) }}" alt="Image placeholder" class="img-fluid" style="height: 200px; object-fit: contain;">
                                         </a>
                                     </figure>
                                     <div class="block-4-text p-4">
@@ -214,7 +214,7 @@
                             <div class="col-sm-6 col-md-4 col-lg-3 mb-4" data-aos="fade" data-aos-delay="">
                                 <a class="block-2-item" href="{{ route('client.shop-single', $f_product->id) }}">
                                     <figure class="image">
-                                        <img src="{{ Storage::url($f_product->product_image) }}" alt="" class="img-fluid" style="height: 180px; object-fit: contain; width: 100%;">
+                                        <img src="{{ asset($f_product->product_image) }}" alt="" class="img-fluid" style="height: 180px; object-fit: contain; width: 100%;">
                                     </figure>
                                     <div class="text text-center mt-2">
                                         <span class="text-uppercase small text-muted">{{ $f_product->category->name ?? 'Sản phẩm' }}</span>

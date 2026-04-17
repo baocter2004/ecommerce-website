@@ -39,7 +39,7 @@
                                 @forelse ($cart_items as $cart_item)
                                     <tr>
                                         <td class="product-thumbnail">
-                                            <img src="{{ Storage::url($cart_item->product->product_image) }}" alt="Image"
+                                            <img src="{{ asset($cart_item->product->product_image) }}" alt="Image"
                                                 class="img-fluid" style="max-width: 80px;">
                                         </td>
                                         <td class="product-name text-left pl-4">

@@ -10,22 +10,16 @@ use Illuminate\Support\Facades\Auth;
 
 class WishlistController extends Controller
 {
-    /**
-     * Display the wishlist page.
-     */
     public function index()
     {
         $favorites = Favorite::with('product')
             ->where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('client.wishlist', compact('favorites'));
     }
 
-    /**
-     * Toggle a product in/out of the wishlist.
-     */
     public function toggle(Product $product)
     {
         if (!Auth::check()) {
@@ -62,9 +56,6 @@ class WishlistController extends Controller
         ]);
     }
 
-    /**
-     * Remove a product from the wishlist (standard request).
-     */
     public function remove(Favorite $favorite)
     {
         if ($favorite->user_id !== Auth::id()) {

@@ -30,7 +30,7 @@
                                 </div>
                                 <figure class="block-4-image">
                                     <a href="{{ route('client.shop-single', $product->id) }}">
-                                        <img src="{{ Storage::url($product->product_image) }}" alt="Image placeholder"
+                                        <img src="{{ asset($product->product_image) }}" alt="Image placeholder"
                                             class="img-fluid">
                                     </a>
                                 </figure>

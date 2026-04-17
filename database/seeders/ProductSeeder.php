@@ -2,191 +2,150 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Product;
+use App\Models\Variant;
+use App\Models\VariantOption;
+use App\Models\ProductVariant;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $products = [
-            [
-                'product_name' => 'Giày Sneaker Retro Nam',
-                'category_id' => 1,
-                'price' => 850000,
-                'product_image' => 'products/item-1.jpg',
-                'short_description' => 'Mẫu giày sneaker mang phong cách retro cổ điển, cực kỳ dễ phối đồ.',
-                'description' => 'Giày Sneaker Retro Nam với chất liệu da lộn cao cấp, đế cao su chống trượt bền bỉ. Phù hợp cho cả đi làm và đi chơi.',
-                'variants' => [
-                    [
-                        'name' => 'Kích thước',
-                        'options' => [
-                            ['option' => '39', 'price_modifier' => 0, 'quantity' => 10],
-                            ['option' => '40', 'price_modifier' => 0, 'quantity' => 15],
-                            ['option' => '41', 'price_modifier' => 50000, 'quantity' => 5],
-                        ]
-                    ],
-                    [
-                        'name' => 'Màu sắc',
-                        'options' => [
-                            ['option' => 'Trắng Trơn', 'price_modifier' => 0, 'quantity' => 20],
-                            ['option' => 'Xám Bụi', 'price_modifier' => 20000, 'quantity' => 10],
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'product_name' => 'Áo Thun Cotton Basic',
-                'category_id' => 2,
-                'price' => 250000,
-                'product_image' => 'products/item-2.jpg',
-                'short_description' => 'Áo thun 100% cotton co giãn 4 chiều, thấm hút mồ hôi cực tốt.',
-                'description' => 'Áo thun Basic dệt từ sợi cotton tinh khiết, bề mặt vải mịn mượt, không bai nhão sau nhiều lần giặt.',
-                'variants' => [
-                    [
-                        'name' => 'Size',
-                        'options' => [
-                            ['option' => 'M', 'price_modifier' => 0, 'quantity' => 50],
-                            ['option' => 'L', 'price_modifier' => 0, 'quantity' => 40],
-                            ['option' => 'XL', 'price_modifier' => 20000, 'quantity' => 20],
-                        ]
-                    ],
-                    [
-                        'name' => 'Màu sắc',
-                        'options' => [
-                            ['option' => 'Đen', 'price_modifier' => 0, 'quantity' => 100],
-                            ['option' => 'Trắng', 'price_modifier' => 0, 'quantity' => 80],
-                            ['option' => 'Xanh Navy', 'price_modifier' => 0, 'quantity' => 60],
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'product_name' => 'Quần Jean Slim Fit',
-                'category_id' => 3,
-                'price' => 450000,
-                'product_image' => 'products/item-3.jpg',
-                'short_description' => 'Dáng Slim Fit tôn dáng, chất denim dày dặn có co giãn nhẹ.',
-                'description' => 'Quần Jean Slim Fit thiết kế hiện đại, đường may chắc chắn. Sản phẩm đã qua xử lý wash màu cao cấp không phai.',
-                'variants' => [
-                    [
-                        'name' => 'Vòng bụng',
-                        'options' => [
-                            ['option' => '29', 'price_modifier' => 0, 'quantity' => 12],
-                            ['option' => '30', 'price_modifier' => 0, 'quantity' => 18],
-                            ['option' => '31', 'price_modifier' => 0, 'quantity' => 15],
-                            ['option' => '32', 'price_modifier' => 0, 'quantity' => 10],
-                        ]
-                    ],
-                    [
-                        'name' => 'Màu sắc',
-                        'options' => [
-                            ['option' => 'Xanh Đậm', 'price_modifier' => 0, 'quantity' => 30],
-                            ['option' => 'Đen Khói', 'price_modifier' => 30000, 'quantity' => 25],
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'product_name' => 'Đồng Hồ Nam Sang Trọng',
-                'category_id' => 4,
-                'price' => 1200000,
-                'product_image' => 'products/item-4.jpg',
-                'short_description' => 'Mặt kính sapphire chống trầy, thiết kế tinh xảo từng chi tiết.',
-                'description' => 'Đồng hồ phong cách doanh nhân với dây da thật, bộ máy quartz Nhật Bản chính xác tuyệt đối.',
-                'variants' => [
-                    [
-                        'name' => 'Màu dây',
-                        'options' => [
-                            ['option' => 'Da Nâu', 'price_modifier' => 0, 'quantity' => 5],
-                            ['option' => 'Da Đen', 'price_modifier' => 0, 'quantity' => 8],
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'product_name' => 'Kính Râm Aviator',
-                'category_id' => 4,
-                'price' => 350000,
-                'product_image' => 'products/item-5.jpg',
-                'short_description' => 'Kính râm dáng phi công classic, bảo vệ mắt khỏi tia UV.',
-                'description' => 'Mắt kính Aviator thời thượng với gọng kim loại siêu nhẹ, tròng kính phân cực chống lóa hiệu quả.',
-                'variants' => [
-                    [
-                        'name' => 'Màu gọng',
-                        'options' => [
-                            ['option' => 'Vàng Gold', 'price_modifier' => 50000, 'quantity' => 10],
-                            ['option' => 'Bạc Silver', 'price_modifier' => 0, 'quantity' => 15],
-                        ]
-                    ]
-                ]
-            ]
+        // Xóa dữ liệu cũ để đảm bảo sạch sẽ
+        Schema::disableForeignKeyConstraints();
+        ProductVariant::truncate();
+        VariantOption::truncate();
+        Variant::truncate();
+        Product::truncate();
+        Schema::enableForeignKeyConstraints();
+
+        // Danh sách ảnh theo loại
+        $shoeImages = [
+            'product-images/giaysneaker.png',
+            'product-images/giaysneakermidnight.png',
+            'product-images/giaythethaonam.png',
+            'product-images/giaythethaonammuathu.png',
+            'product-images/giaythethaonu.png',
+            'client/images/shoe_1.jpg',
+            'client/images/shoe.png'
         ];
 
-        foreach ($products as $pData) {
-            $variantsData = $pData['variants'];
-            unset($pData['variants']);
+        $shirtImages = [
+            'product-images/anhaobongro.png',
+            'product-images/anhaothunden.png',
+            'product-images/anhaothungtronden.png',
+            'product-images/anhaothuntayxanh.png',
+            'product-images/aothunbabytee.png',
+            'product-images/aothunlocalbrand.png',
+            'product-images/aothoitrangden.png',
+            'product-images/aothoitrangdo.png',
+            'client/images/cloth_1.jpg',
+            'client/images/cloth_2.jpg',
+            'client/images/cloth_3.jpg'
+        ];
 
-            $product = \App\Models\Product::create($pData);
+        $categories = [
+            1 => ['name' => 'Giày dép', 'images' => $shoeImages, 'prefix' => 'Giày'],
+            2 => ['name' => 'Áo thời trang', 'images' => $shirtImages, 'prefix' => 'Áo'],
+            3 => ['name' => 'Quần nam/nữ', 'images' => $shirtImages, 'prefix' => 'Quần'], 
+            4 => ['name' => 'Phụ kiện', 'images' => $shoeImages, 'prefix' => 'Phụ kiện'],
+        ];
 
-            $colors = [];
-            $sizes = [];
+        for ($catId = 1; $catId <= 4; $catId++) {
+            $config = $categories[$catId];
+            
+            for ($i = 1; $i <= 10; $i++) {
+                $image = $config['images'][array_rand($config['images'])];
+                $price = rand(200, 1500) * 1000;
+                
+                $product = Product::create([
+                    'product_name' => $config['prefix'] . " " . $this->getRandomName() . " " . $i,
+                    'category_id' => $catId,
+                    'price' => $price,
+                    'product_image' => $image,
+                    'short_description' => "Mẫu " . strtolower($config['name']) . " cao cấp, thiết kế hiện đại, phù hợp xu hướng thời trang mới nhất.",
+                    'description' => "Sản phẩm " . $config['name'] . " được làm từ chất liệu chọn lọc, mang lại cảm giác thoải mái và tự tin cho người mặc. Độ bền cao, dễ dàng phối đồ cho nhiều hoàn cảnh khác nhau.",
+                    'is_active' => 1,
+                ]);
 
-            foreach ($variantsData as $vData) {
-                $options = $vData['options'];
-                $variantName = $vData['name'];
-                unset($vData['options']);
-                $vData['product_id'] = $product->id;
-
-                $variant = \App\Models\Variant::create($vData);
-
-                foreach ($options as $oData) {
-                    $oData['variant_id'] = $variant->id;
-                    \App\Models\VariantOption::create($oData);
-
-                    if ($variantName === 'Màu sắc' || $variantName === 'Màu dây' || $variantName === 'Màu gọng') {
-                        $colors[] = $oData['option'];
-                    } elseif ($variantName === 'Kích thước' || $variantName === 'Size' || $variantName === 'Vòng bụng') {
-                        $sizes[] = $oData['option'];
-                    }
+                // Tạo biến thể cho từng sản phẩm
+                if ($catId == 1) { // Giày
+                    $this->createVariants($product, 'Kích thước', ['39', '40', '41', '42'], 'Màu sắc', ['Đen', 'Trắng', 'Xanh']);
+                } else if ($catId == 2 || $catId == 3) { // Áo / Quần
+                    $this->createVariants($product, 'Size', ['S', 'M', 'L', 'XL'], 'Màu sắc', ['Đen', 'Trắng', 'Navy']);
+                } else {
+                    $this->createVariants($product, 'Loại', ['Basic', 'Premium'], null, []);
                 }
             }
+        }
+    }
 
-            // Create Product Variants (Combinations)
-            if (empty($colors) && empty($sizes)) {
-                // No variants, maybe create a default one or skip
-            } elseif (empty($colors)) {
-                foreach ($sizes as $size) {
-                    \App\Models\ProductVariant::create([
+    private function getRandomName()
+    {
+        $names = ['Retro', 'Midnight', 'Sport', 'Active', 'Classic', 'Modern', 'Luxury', 'Elegance', 'Urban', 'Street'];
+        return $names[array_rand($names)];
+    }
+
+    private function createVariants($product, $v1Name, $v1Options, $v2Name = null, $v2Options = [])
+    {
+        $colors = [];
+        $sizes = [];
+
+        $variant1 = Variant::create([
+            'product_id' => $product->id,
+            'name' => $v1Name
+        ]);
+
+        foreach ($v1Options as $opt) {
+            VariantOption::create([
+                'variant_id' => $variant1->id,
+                'option' => $opt,
+                'price_modifier' => rand(0, 3) * 10000,
+                'quantity' => rand(10, 100)
+            ]);
+            $sizes[] = $opt;
+        }
+
+        if ($v2Name) {
+            $variant2 = Variant::create([
+                'product_id' => $product->id,
+                'name' => $v2Name
+            ]);
+
+            foreach ($v2Options as $opt) {
+                VariantOption::create([
+                    'variant_id' => $variant2->id,
+                    'option' => $opt,
+                    'price_modifier' => 0,
+                    'quantity' => rand(10, 100)
+                ]);
+                $colors[] = $opt;
+            }
+        }
+
+        if (!empty($colors) && !empty($sizes)) {
+            foreach ($colors as $c) {
+                foreach ($sizes as $s) {
+                    ProductVariant::create([
                         'product_id' => $product->id,
-                        'color' => null,
-                        'size' => $size,
-                        'stock' => rand(10, 50),
+                        'color' => $c,
+                        'size' => $s,
+                        'stock' => rand(5, 50),
                     ]);
                 }
-            } elseif (empty($sizes)) {
-                foreach ($colors as $color) {
-                    \App\Models\ProductVariant::create([
-                        'product_id' => $product->id,
-                        'color' => $color,
-                        'size' => null,
-                        'stock' => rand(10, 50),
-                    ]);
-                }
-            } else {
-                foreach ($colors as $color) {
-                    foreach ($sizes as $size) {
-                        \App\Models\ProductVariant::create([
-                            'product_id' => $product->id,
-                            'color' => $color,
-                            'size' => $size,
-                            'stock' => rand(5, 30),
-                        ]);
-                    }
-                }
+            }
+        } elseif (!empty($sizes)) {
+            foreach ($sizes as $s) {
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'color' => null,
+                    'size' => $s,
+                    'stock' => rand(5, 50),
+                ]);
             }
         }
     }

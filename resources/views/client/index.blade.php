@@ -60,8 +60,9 @@
                 @foreach ($categories as $category)
                     <div class="col-sm-6 col-md-6 col-lg-4 mb-4 mb-lg-0" data-aos="fade" data-aos-delay="">
                         <div class="block-2-item">
-                            <figure class="image">
-                                <img src="{{Storage::url($category->category_image)}}" alt="chưa có" class="img-fluid">
+                            <figure class="image mb-0">
+                                <img src="{{ asset('storage/' . $category->category_image) }}" alt="{{ $category->name }}"
+                                    class="img-fluid" style="width: 100%; height: 450px; object-fit: cover;">
                             </figure>
                             <div class="text">
                                 <span>Collections</span>
@@ -87,8 +88,7 @@
             </div>
             <div class="row align-items-center">
                 <div class="col-md-12 col-lg-7 mb-5">
-                    <a href="#"><img src="/client/images/blog_1.jpg" alt="Image placeholder"
-                            class="img-fluid rounded"></a>
+                    <a href="#"><img src="/client/images/blog_1.jpg" alt="Image placeholder" class="img-fluid rounded"></a>
                 </div>
                 <div class="col-md-12 col-lg-5 text-center pl-md-5">
                     <h2><a href="#">50% less in all items</a></h2>

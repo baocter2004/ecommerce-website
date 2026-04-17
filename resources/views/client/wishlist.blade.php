@@ -43,7 +43,7 @@
                                     <tr>
                                         <td class="product-thumbnail">
                                             <a href="{{ route('client.shop-single', $favorite->product->id) }}">
-                                                <img src="{{ Storage::url($favorite->product->product_image) }}" alt="Image" class="img-fluid" style="max-width: 100px;">
+                                                <img src="{{ asset($favorite->product->product_image) }}" alt="Image" class="img-fluid" style="max-width: 100px;">
                                             </a>
                                         </td>
                                         <td class="product-name">
@@ -81,6 +81,14 @@
                                 
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="row" data-aos="fade-up">
+                        <div class="col-md-12 text-center">
+                            <div class="site-block-27">
+                                {{ $favorites->links() }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
