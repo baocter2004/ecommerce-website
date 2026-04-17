@@ -72,7 +72,9 @@
                             <a href="{{ route('client.cart') }}" class="site-cart text-dark position-relative d-inline-block" style="line-height: 1;">
                                 <i class="bi bi-cart3 h4 mb-0"></i>
                                 @php
-                                    $cart = \App\Models\Cart::where(Auth::check() ? 'user_id' : 'session_id', Auth::check() ? Auth::id() : session()->getId())->first();
+                                    $cart = \App\Models\Cart::where(Auth::check() ? 'user_id' : 'session_id', Auth::check() ? Auth::id() : session()->getId())
+                                        ->latest('updated_at')
+                                        ->first();
                                     $cartCount = $cart ? $cart->items->sum('quantity') : 0;
                                 @endphp
                                 <span class="count">{{ $cartCount }}</span>

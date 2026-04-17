@@ -71,6 +71,16 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="quantity" class="form-label">Tồn kho (dùng cho sản phẩm không có biến thể)</label>
+                                <input type="number" class="form-control @error('quantity') is-invalid @enderror"
+                                    name="quantity" id="quantity" min="0" placeholder="Nhập số lượng tồn"
+                                    value="{{ old('quantity', $product->quantity ?? 0) }}" />
+                                @error('quantity')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="short_description" class="form-label">Mô tả ngắn</label>
                                 <textarea name="short_description" id="short_description"
                                     class="form-control @error('short_description') is-invalid @enderror" rows="2"

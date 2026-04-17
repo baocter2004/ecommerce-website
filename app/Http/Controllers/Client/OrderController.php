@@ -7,6 +7,8 @@ use App\Http\Requests\CreateOrderRequest;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\VariantOption;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +19,8 @@ class OrderController extends Controller
     private function getCart()
     {
         return Auth::check()
-            ? Cart::where('user_id', Auth::user()->id)->first()
-            : Cart::where('session_id', session()->getId())->first();
+            ? Cart::where('user_id', Auth::id())->latest('updated_at')->first()
+            : Cart::where('session_id', session()->getId())->latest('updated_at')->first();
     }
 
     public function checkout()
@@ -86,13 +88,32 @@ class OrderController extends Controller
                     'price'            => $item->price,
                     'variant_id'       => $item->variant_id,
                     'variant_option_id'=> $item->variant_option_id,
+                    'color'            => $item->color,
+                    'size'             => $item->size,
                 ];
                 OrderItem::create($orderItemData);
 
-                // Trừ tồn kho variant option
-                if ($item->variant_option_id) {
+                // Trừ tồn kho: ưu tiên theo combo ở product_variants
+                if ($item->color || $item->size) {
+                    $pv = ProductVariant::query()
+                        ->where('product_id', $item->product_id)
+                        ->when($item->color, fn ($q) => $q->where('color', $item->color))
+                        ->when($item->size, fn ($q) => $q->where('size', $item->size))
+                        ->first();
+
+                    if ($pv) {
+                        $pv->decrement('stock', $item->quantity);
+                    } elseif ($item->variant_option_id) {
+                        // Fallback nếu vẫn còn dùng kiểu cũ
+                        VariantOption::where('id', $item->variant_option_id)
+                            ->decrement('quantity', $item->quantity);
+                    }
+                } elseif ($item->variant_option_id) {
                     VariantOption::where('id', $item->variant_option_id)
                         ->decrement('quantity', $item->quantity);
+                } else {
+                    // Basic product (no variants) stock lives on products.quantity
+                    Product::where('id', $item->product_id)->decrement('quantity', $item->quantity);
                 }
             }
 

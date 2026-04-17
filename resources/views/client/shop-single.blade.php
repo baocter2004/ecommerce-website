@@ -38,11 +38,20 @@
 
             <div class="row">
                 <div class="col-md-6 mb-4 mb-md-0">
-                    <img src="{{ Storage::url($product->product_image) }}" alt="Image" class="img-fluid rounded shadow-sm">
+                    <img src="{{ Storage::url($product->product_image) }}" alt="Image"
+                        class="img-fluid rounded shadow-sm">
                 </div>
                 <div class="col-md-6">
                     <h2 class="text-black font-weight-bold mb-3">{{ $product->product_name }}</h2>
+                    <h3 class="text-muted mb-4">Danh Mục : {{ $product->category->name }}</h3>
                     <p class="text-muted mb-4">{{ $product->short_description }}</p>
+
+                    @php
+                        $hasVariants = $product->variants->isNotEmpty();
+                        $isBasicProduct = $product->variants->isEmpty();
+                        $basicStock = (int) ($product->quantity ?? 0);
+                        $allowDefaultBasic = $hasVariants && $product->variants->count() === 1 && $basicStock > 0;
+                    @endphp
 
                     <div class="mb-4">
                         @php
@@ -59,14 +68,28 @@
                                 }
                             }
                         @endphp
-                        
+
                         <h4 class="text-primary font-weight-bold mb-0">
                             <span id="product-price">
                                 {{ number_format(($minPrice ?? 0) + $product->price, 0, ',', '.') }}
                             </span> VND
                         </h4>
                         @if ($minPrice !== null && $minPrice !== $maxPrice)
-                            <small class="text-muted">Giá dao động: {{ number_format($minPrice + $product->price, 0, ',', '.') }}đ - {{ number_format($maxPrice + $product->price, 0, ',', '.') }}đ</small>
+                            <small class="text-muted">Giá dao động:
+                                {{ number_format($minPrice + $product->price, 0, ',', '.') }}đ -
+                                {{ number_format($maxPrice + $product->price, 0, ',', '.') }}đ</small>
+                        @endif
+
+                        @if ($isBasicProduct || $allowDefaultBasic)
+                            <div class="mt-2">
+                                @if ($basicStock > 0)
+                                    <small class="text-success font-weight-bold">
+                                        {{ $isBasicProduct ? 'Còn' : 'Mặc định còn' }} {{ $basicStock }} sản phẩm
+                                    </small>
+                                @else
+                                    <small class="text-danger font-weight-bold">Hết hàng</small>
+                                @endif
+                            </div>
                         @endif
                     </div>
 
@@ -77,15 +100,28 @@
                                 <div class="variant-group mb-3 text-black">
                                     <h6 class="font-weight-bold mb-2">{{ $variant->name }}:</h6>
                                     <div class="d-flex flex-wrap">
+                                        @if ($allowDefaultBasic)
+                                            <div class="custom-control custom-radio mr-3 mb-2">
+                                                <input type="radio" id="option-{{ $variant->id }}-basic"
+                                                    name="option_ids[{{ $variant->id }}]"
+                                                    value="__basic__" class="custom-control-input"
+                                                    data-price="0" checked>
+                                                <label class="custom-control-label" for="option-{{ $variant->id }}-basic">
+                                                    Mặc định
+                                                </label>
+                                            </div>
+                                        @endif
                                         @foreach ($variant->options as $index => $option)
                                             <div class="custom-control custom-radio mr-3 mb-2">
-                                                <input type="radio" id="option-{{ $option->id }}" name="option_id"
+                                                <input type="radio" id="option-{{ $variant->id }}-{{ $option->id }}"
+                                                    name="option_ids[{{ $variant->id }}]"
                                                     value="{{ $option->id }}" class="custom-control-input"
                                                     data-price="{{ $option->price_modifier }}"
-                                                    {{ $index === 0 ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="option-{{ $option->id }}">
+                                                    {{ !$allowDefaultBasic && $index === 0 ? 'checked' : '' }}>
+                                                <label class="custom-control-label"
+                                                    for="option-{{ $variant->id }}-{{ $option->id }}">
                                                     {{ $option->option }}
-                                                    @if($option->price_modifier > 0)
+                                                    @if ($option->price_modifier > 0)
                                                         (+{{ number_format($option->price_modifier, 0, ',', '.') }}đ)
                                                     @elseif($option->price_modifier < 0)
                                                         (-{{ number_format(abs($option->price_modifier), 0, ',', '.') }}đ)
@@ -102,19 +138,27 @@
                             <div class="col-auto">
                                 <div class="input-group" style="max-width: 140px;">
                                     <div class="input-group-prepend">
-                                        <button class="btn btn-outline-primary js-btn-minus" type="button">&minus;</button>
+                                        <button class="btn btn-outline-primary js-detail-btn-minus" type="button">&minus;</button>
                                     </div>
                                     <input type="text" class="form-control text-center" id="quantity" name="quantity"
                                         value="1" min="1" aria-label="Quantity">
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-primary js-btn-plus" type="button">&plus;</button>
+                                        <button class="btn btn-outline-primary js-detail-btn-plus" type="button">&plus;</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="col">
-                                <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold">
-                                    <span class="icon icon-shopping_cart mr-2"></span> THÊM VÀO GIỎ
-                                </button>
+                                @if (Auth::user())
+                                    <button type="submit"
+                                        class="btn btn-primary btn-block py-2 font-weight-bold"
+                                        {{ $isBasicProduct && $basicStock <= 0 ? 'disabled' : '' }}>
+                                        <span class="icon icon-shopping_cart mr-2"></span> THÊM VÀO GIỎ
+                                    </button>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn btn-outline-primary btn-block py-2 font-weight-bold">
+                                        <span class="icon icon-shopping_cart mr-2"></span> ĐĂNG NHẬP ĐỂ MUA HÀNG
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </form>
@@ -124,7 +168,9 @@
                     <div class="d-flex align-items-center mt-4">
                         @auth
                             @php
-                                $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())->where('product_id', $product->id)->exists();
+                                $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())
+                                    ->where('product_id', $product->id)
+                                    ->exists();
                             @endphp
                             <button type="button" class="btn btn-outline-danger btn-sm px-4 rounded-pill favorite-btn"
                                 data-product-id="{{ $product->id }}">
@@ -143,8 +189,9 @@
             <!-- Reviews Section -->
             <div class="row mt-5 pt-5 border-top">
                 <div class="col-md-12">
-                    <h3 class="text-black h4 mb-4 font-weight-bold">Bình luận & Đánh giá ({{ $product->comments->count() }})</h3>
-                    
+                    <h3 class="text-black h4 mb-4 font-weight-bold">Bình luận & Đánh giá
+                        ({{ $product->comments->count() }})</h3>
+
                     <div class="row">
                         <!-- List Reviews -->
                         <div class="col-md-7">
@@ -154,7 +201,8 @@
                                         <h6 class="text-black font-weight-bold mb-0">{{ $comment->user->name }}</h6>
                                         <div class="text-warning small">
                                             @for ($i = 1; $i <= 5; $i++)
-                                                <i class="bi {{ $i <= $comment->rating ? 'bi-star-fill' : 'bi-star' }}"></i>
+                                                <i
+                                                    class="bi {{ $i <= $comment->rating ? 'bi-star-fill' : 'bi-star' }}"></i>
                                             @endfor
                                         </div>
                                     </div>
@@ -177,31 +225,46 @@
                                         <form action="{{ route('client.comments.store') }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                            
+
                                             <div class="form-group mb-3">
                                                 <label class="text-black small font-weight-bold">Đánh giá của bạn</label>
                                                 <div class="star-rating h4 mb-0">
                                                     <div class="d-flex flex-row-reverse justify-content-start">
-                                                        <input type="radio" id="star5" name="rating" value="5" class="d-none" required /><label for="star5" class="px-1 pointer"><i class="bi bi-star"></i></label>
-                                                        <input type="radio" id="star4" name="rating" value="4" class="d-none" /><label for="star4" class="px-1 pointer"><i class="bi bi-star"></i></label>
-                                                        <input type="radio" id="star3" name="rating" value="3" class="d-none" /><label for="star3" class="px-1 pointer"><i class="bi bi-star"></i></label>
-                                                        <input type="radio" id="star2" name="rating" value="2" class="d-none" /><label for="star2" class="px-1 pointer"><i class="bi bi-star"></i></label>
-                                                        <input type="radio" id="star1" name="rating" value="1" class="d-none" /><label for="star1" class="px-1 pointer"><i class="bi bi-star"></i></label>
+                                                        <input type="radio" id="star5" name="rating" value="5"
+                                                            class="d-none" required /><label for="star5"
+                                                            class="px-1 pointer"><i class="bi bi-star"></i></label>
+                                                        <input type="radio" id="star4" name="rating" value="4"
+                                                            class="d-none" /><label for="star4" class="px-1 pointer"><i
+                                                                class="bi bi-star"></i></label>
+                                                        <input type="radio" id="star3" name="rating" value="3"
+                                                            class="d-none" /><label for="star3" class="px-1 pointer"><i
+                                                                class="bi bi-star"></i></label>
+                                                        <input type="radio" id="star2" name="rating" value="2"
+                                                            class="d-none" /><label for="star2" class="px-1 pointer"><i
+                                                                class="bi bi-star"></i></label>
+                                                        <input type="radio" id="star1" name="rating" value="1"
+                                                            class="d-none" /><label for="star1" class="px-1 pointer"><i
+                                                                class="bi bi-star"></i></label>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="form-group mb-4">
-                                                <label for="content" class="text-black font-weight-bold small mb-2">Lời nhắn</label>
-                                                <textarea name="content" id="content" rows="4" class="form-control border-0" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." required></textarea>
+                                                <label for="content" class="text-black font-weight-bold small mb-2">Lời
+                                                    nhắn</label>
+                                                <textarea name="content" id="content" rows="4" class="form-control border-0"
+                                                    placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." required></textarea>
                                             </div>
 
-                                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm">GỬI BÌNH LUẬN</button>
+                                            <button type="submit"
+                                                class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm">GỬI BÌNH
+                                                LUẬN</button>
                                         </form>
                                     @else
                                         <div class="text-center py-3">
                                             <p class="text-muted mb-3">Bạn cần đăng nhập để gửi bình luận.</p>
-                                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm px-4">ĐĂNG NHẬP NGAY</a>
+                                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm px-4">ĐĂNG
+                                                NHẬP NGAY</a>
                                         </div>
                                     @endauth
                                 </div>
@@ -214,12 +277,26 @@
     </div>
 
     <style>
-        .star-rating label { cursor: pointer; color: #ccc; transition: color 0.2s; }
+        .star-rating label {
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+
         .star-rating label:hover,
-        .star-rating label:hover ~ label,
-        .star-rating input:checked ~ label { color: #ffc107; }
-        .star-rating input:checked ~ label i::before { content: "\f586"; } /* star-fill */
-        .pointer { cursor: pointer; }
+        .star-rating label:hover~label,
+        .star-rating input:checked~label {
+            color: #ffc107;
+        }
+
+        .star-rating input:checked~label i::before {
+            content: "\f586";
+        }
+
+        /* star-fill */
+        .pointer {
+            cursor: pointer;
+        }
     </style>
 
     @include('client.layouts.components.featured-product', ['featured_products' => $featured_products])
@@ -229,14 +306,30 @@
             var basePrice = parseFloat('{{ $product->price }}');
             var priceDisplay = document.getElementById('product-price');
             var quantityInput = document.getElementById('quantity');
-            var variantOptions = document.querySelectorAll('input[name="option_id"]');
+            var variantOptions = document.querySelectorAll('input[name^="option_ids["]');
+            var isBasicProduct = {{ $isBasicProduct ? 'true' : 'false' }};
+            var allowDefaultBasic = {{ $allowDefaultBasic ? 'true' : 'false' }};
+            var basicMaxStock = parseInt('{{ (int) ($product->quantity ?? 0) }}', 10);
+
+            function isDefaultBasicSelected() {
+                if (!allowDefaultBasic) return false;
+                return Boolean(document.querySelector('input[name^="option_ids["][value="__basic__"]:checked'));
+            }
 
             function updatePriceDisplay() {
                 var quantityNumber = parseInt(quantityInput.value, 10);
                 if (isNaN(quantityNumber) || quantityNumber < 1) quantityNumber = 1;
+                if ((isBasicProduct || isDefaultBasicSelected()) && !isNaN(basicMaxStock) && basicMaxStock >= 0) {
+                    quantityNumber = Math.min(quantityNumber, Math.max(0, basicMaxStock));
+                    if (quantityNumber < 1) quantityNumber = 1;
+                }
+                quantityInput.value = String(quantityNumber);
 
-                var selectedOption = document.querySelector('input[name="option_id"]:checked');
-                var priceModifier = selectedOption ? parseFloat(selectedOption.getAttribute('data-price')) : 0;
+                var priceModifier = 0;
+                document.querySelectorAll('input[name^="option_ids["]:checked').forEach(function(opt) {
+                    var mod = parseFloat(opt.getAttribute('data-price'));
+                    if (!isNaN(mod)) priceModifier += mod;
+                });
 
                 var total = (basePrice + priceModifier) * quantityNumber;
                 priceDisplay.textContent = total.toLocaleString('vi-VN');
@@ -246,20 +339,24 @@
             variantOptions.forEach(opt => opt.addEventListener('change', updatePriceDisplay));
 
             // Plus/Minus buttons logic
-            document.querySelector('.js-btn-minus').addEventListener('click', function() {
+            document.querySelector('.js-detail-btn-minus').addEventListener('click', function() {
                 var val = parseInt(quantityInput.value);
                 if (val > 1) {
                     quantityInput.value = val - 1;
                     updatePriceDisplay();
                 }
             });
-            document.querySelector('.js-btn-plus').addEventListener('click', function() {
+            document.querySelector('.js-detail-btn-plus').addEventListener('click', function() {
                 var val = parseInt(quantityInput.value);
-                quantityInput.value = val + 1;
+                var next = val + 1;
+                if ((isBasicProduct || isDefaultBasicSelected()) && !isNaN(basicMaxStock) && basicMaxStock >= 0) {
+                    next = Math.min(next, basicMaxStock);
+                }
+                quantityInput.value = next;
                 updatePriceDisplay();
             });
 
             updatePriceDisplay();
-            });
-            </script>
+        });
+    </script>
 @endsection

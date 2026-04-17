@@ -44,9 +44,22 @@
                                         </td>
                                         <td class="product-name text-left pl-4">
                                             <h2 class="h5 text-black mb-1">{{ $cart_item->product->product_name }}</h2>
-                                            @if ($cart_item->variantOption)
+                                            @if ($cart_item->color || $cart_item->size)
                                                 <small class="text-primary d-block">
-                                                    {{ $cart_item->variant->name }}: {{ $cart_item->variantOption->option }}
+                                                    @if ($cart_item->size)
+                                                        <span class="mr-2">Size: {{ $cart_item->size }}</span>
+                                                    @endif
+                                                    @if ($cart_item->color)
+                                                        <span>Màu: {{ $cart_item->color }}</span>
+                                                    @endif
+                                                </small>
+                                            @elseif (($cart_item->product->variants->isNotEmpty() ?? false) && !$cart_item->variantOption)
+                                                <small class="text-primary d-block">
+                                                    Mặc định
+                                                </small>
+                                            @elseif ($cart_item->variantOption)
+                                                <small class="text-primary d-block">
+                                                    {{ optional($cart_item->variant)->name }}: {{ $cart_item->variantOption->option }}
                                                 </small>
                                             @endif
                                         </td>
@@ -167,6 +180,7 @@
                     const STORAGE_KEY = 'cart_quantities_v1';
                     const csrfToken = @json(csrf_token());
                     const updateUrlTemplate = @json(route('client.cart.update', ['cartItemId' => '__CART_ITEM_ID__']));
+                    const controllersById = new Map(); // cartItemId -> AbortController
 
                     const formatVnd = (amount) => {
                         const n = Number(amount || 0);
@@ -226,10 +240,21 @@
                         }
                     };
 
-                    const patchQuantity = async (cartItemId, quantity) => {
+                    const setRowBusy = (row, busy) => {
+                        row.dataset.busy = busy ? '1' : '0';
+                        const plus = row.querySelector('.js-btn-plus');
+                        const minus = row.querySelector('.js-btn-minus');
+                        if (plus) plus.disabled = !!busy;
+                        if (minus) minus.disabled = !!busy;
+                        if (busy) row.classList.add('opacity-75');
+                        else row.classList.remove('opacity-75');
+                    };
+
+                    const patchQuantity = async (cartItemId, quantity, signal) => {
                         const url = updateUrlTemplate.replace('__CART_ITEM_ID__', encodeURIComponent(cartItemId));
                         const res = await fetch(url, {
                             method: 'PATCH',
+                            signal,
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Accept': 'application/json',
@@ -258,21 +283,39 @@
                         const next = Math.max(1, current + delta);
                         if (next === current) return;
 
+                        // Cancel any in-flight request for this row
+                        const existing = controllersById.get(String(cartItemId));
+                        if (existing) existing.abort();
+                        const controller = new AbortController();
+                        controllersById.set(String(cartItemId), controller);
+
                         // Optimistic UI
                         setRowQty(row, next);
                         setStoredQty(cartItemId, next);
+                        setRowBusy(row, true);
 
                         try {
-                            const data = await patchQuantity(cartItemId, next);
+                            const data = await patchQuantity(cartItemId, next, controller.signal);
                             setRowQty(row, data.quantity);
                             setRowLineTotal(row, data.line_price);
                             setSummary(data.subtotal);
                             setStoredQty(cartItemId, data.quantity);
                         } catch (e) {
+                            // If this was aborted due to rapid clicking, don't rollback/alert.
+                            if (e && (e.name === 'AbortError' || String(e.message || '').toLowerCase().includes('aborted'))) {
+                                return;
+                            }
                             // rollback
                             setRowQty(row, current);
                             setStoredQty(cartItemId, current);
                             alert(e.message || 'Không thể cập nhật số lượng.');
+                        } finally {
+                            // Only clear busy state if this is still the latest controller
+                            const latest = controllersById.get(String(cartItemId));
+                            if (latest === controller) {
+                                controllersById.delete(String(cartItemId));
+                                setRowBusy(row, false);
+                            }
                         }
                     };
 
@@ -310,9 +353,15 @@
 
                             // Set UI first for immediate feel
                             setRowQty(row, saved);
+                            setRowBusy(row, true);
 
                             try {
-                                const data = await patchQuantity(cartItemId, saved);
+                                const existing = controllersById.get(String(cartItemId));
+                                if (existing) existing.abort();
+                                const controller = new AbortController();
+                                controllersById.set(String(cartItemId), controller);
+
+                                const data = await patchQuantity(cartItemId, saved, controller.signal);
                                 setRowQty(row, data.quantity);
                                 setRowLineTotal(row, data.line_price);
                                 setSummary(data.subtotal);
@@ -321,6 +370,8 @@
                                 // If sync fails, keep server value and overwrite localStorage
                                 setRowQty(row, current);
                                 setStoredQty(cartItemId, current);
+                            } finally {
+                                setRowBusy(row, false);
                             }
                         }
                     })();

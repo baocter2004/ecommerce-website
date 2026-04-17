@@ -78,10 +78,11 @@
                                         </a>
                                     </figure>
                                     <div class="block-4-text p-4">
-                                        <h3 class="mb-2">
+                                        <h3 class="mb-2 text-black font-weight-bold mb-3">
                                             <a href="{{ route('client.shop-single', $product->id) }}">{{ Str::limit($product->product_name, 20) }}</a>
                                         </h3>
-                                        <p class="mb-2 small text-muted">{{ Str::limit($product->short_description, 30) }}</p>
+                                        <h3 class="text-muted mb-4">{{ $product->category->name }}</h3>
+                                        <p class="mb-2 text-muted">{{ Str::limit($product->short_description, 30) }}</p>
                                         <p class="text-primary font-weight-bold mb-0">
                                             @php
                                                 $minPrice = null;

@@ -1,7 +1,7 @@
 @extends('admin.layouts.master')
 
 @section('title')
-    Chi tiết Product : {{ $product->name }}
+    Chi tiết Product : {{ $product->product_name }}
 @endsection
 
 @section('content')
@@ -22,9 +22,16 @@
                 </div>
                 <div class="card-body text-center">
                     <div class="mb-3 border rounded p-2 bg-light">
-                        <img src="{{ Storage::url($product->product_image) }}" 
-                             class="img-fluid rounded shadow-sm" alt="Product Image"
-                             style="max-height: 350px; width: 100%; object-fit: contain;">
+                        @if (!empty($product->product_image))
+                            <img src="{{ Storage::url($product->product_image) }}" 
+                                 class="img-fluid rounded shadow-sm" alt="Product Image"
+                                 style="max-height: 350px; width: 100%; object-fit: contain;">
+                        @else
+                            <div class="py-5 text-muted">
+                                <i class="fa fa-picture-o fa-3x mb-3"></i>
+                                <div>Chưa có ảnh sản phẩm</div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -65,6 +72,19 @@
                         <div class="col-md-12">
                             <h3 class="font-weight-bold text-dark">{{ $product->product_name }}</h3>
                             <h4 class="text-primary font-weight-bold">{{ number_format($product->price, 0, ',', '.') }} đ</h4>
+                            <div class="mt-2">
+                                @if ($product->variants->isEmpty())
+                                    <span class="badge badge-light border px-3 py-2 rounded-pill">
+                                        <i class="fa fa-cubes mr-1"></i>
+                                        Tồn kho (basic): <strong>{{ (int) ($product->quantity ?? 0) }}</strong>
+                                    </span>
+                                @else
+                                    <span class="badge badge-light border px-3 py-2 rounded-pill">
+                                        <i class="fa fa-tags mr-1"></i>
+                                        Sản phẩm có biến thể (tồn kho theo option/combo)
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -89,7 +109,13 @@
                                     @foreach ($variant->options as $option)
                                         <div class="badge badge-white border m-1 p-2 shadow-xs text-left" style="min-width: 100px;">
                                             <div class="text-dark font-weight-bold">{{ $option->option }}</div>
-                                            <div class="small text-success">+{{ number_format($option->price_modifier, 0, ',', '.') }} đ</div>
+                                            <div class="small {{ (float) $option->price_modifier >= 0 ? 'text-success' : 'text-danger' }}">
+                                                {{ (float) $option->price_modifier >= 0 ? '+' : '-' }}
+                                                {{ number_format(abs((float) $option->price_modifier), 0, ',', '.') }} đ
+                                            </div>
+                                            <div class="small text-muted">
+                                                Tồn: <strong>{{ (int) ($option->quantity ?? 0) }}</strong>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -98,6 +124,34 @@
                             <p class="text-muted italic">Sản phẩm này không có biến thể.</p>
                         @endforelse
                     </div>
+
+                    @if ($product->productVariants && $product->productVariants->isNotEmpty())
+                        <div class="mt-4">
+                            <h6 class="font-weight-bold text-dark border-bottom pb-2">
+                                <i class="fa fa-th-large mr-1"></i> Tồn kho theo combo (Color/Size)
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered bg-white mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Màu</th>
+                                            <th>Size</th>
+                                            <th class="text-right">Tồn kho</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($product->productVariants as $pv)
+                                            <tr>
+                                                <td>{{ $pv->color ?? '-' }}</td>
+                                                <td>{{ $pv->size ?? '-' }}</td>
+                                                <td class="text-right font-weight-bold">{{ (int) ($pv->stock ?? 0) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

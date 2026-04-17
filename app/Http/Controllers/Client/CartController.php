@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\VariantOption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,11 +17,11 @@ class CartController extends Controller
     public function index()
     {
         $cart = Auth::check()
-            ? Cart::where('user_id', Auth::user()->id)->first()
-            : Cart::where('session_id', session()->getId())->first();
+            ? Cart::where('user_id', Auth::id())->latest('updated_at')->first()
+            : Cart::where('session_id', session()->getId())->latest('updated_at')->first();
 
         $cart_items = $cart 
-            ? $cart->items()->with(['product', 'variant', 'variantOption'])->get() 
+            ? $cart->items()->with(['product', 'product.variants', 'variant', 'variantOption'])->get() 
             : collect();
 
         return view('client.cart', compact('cart_items'));
@@ -32,8 +33,67 @@ class CartController extends Controller
         try {
             // Tìm sản phẩm
             $product = Product::findOrFail($productId);
-            $variantOption = VariantOption::findOrFail($request->input('option_id'));
-            $quantity = $request->input('quantity');
+            $quantity = (int) $request->input('quantity', 1);
+            if ($quantity < 1) {
+                $quantity = 1;
+            }
+
+            $optionIdsByVariant = $request->input('option_ids', []);
+            if (!is_array($optionIdsByVariant)) {
+                $optionIdsByVariant = [];
+            }
+
+            $variants = $product->variants()->with('options')->get();
+            $isDefaultBasicSelection = false;
+            if ($variants->count() === 1) {
+                $onlyVariantId = $variants->first()->id;
+                $isDefaultBasicSelection = (($optionIdsByVariant[$onlyVariantId] ?? null) === '__basic__');
+            }
+            if ($variants->isNotEmpty()) {
+                // Ensure each variant has a selected option
+                foreach ($variants as $variant) {
+                    if (empty($optionIdsByVariant[$variant->id])) {
+                        throw ValidationException::withMessages([
+                            'option_ids' => 'Vui lòng chọn đầy đủ biến thể cho sản phẩm.',
+                        ]);
+                    }
+                }
+            }
+
+            $selectedOptionIds = collect($optionIdsByVariant)
+                ->values()
+                ->filter(fn ($v) => is_numeric($v) && (int) $v > 0)
+                ->map(fn ($v) => (int) $v)
+                ->all();
+            $selectedOptions = VariantOption::query()
+                ->whereIn('id', $selectedOptionIds)
+                ->with('variant')
+                ->get()
+                ->keyBy('id');
+
+            // Map selected options to color/size (best-effort)
+            $selectedColor = null;
+            $selectedSize = null;
+            foreach ($optionIdsByVariant as $variantId => $optionId) {
+                $opt = $selectedOptions->get((int) $optionId);
+                if (!$opt || !$opt->variant) {
+                    continue;
+                }
+
+                $variantName = mb_strtolower((string) $opt->variant->name);
+                if (str_contains($variantName, 'màu') || str_contains($variantName, 'mau') || str_contains($variantName, 'color')) {
+                    $selectedColor = $opt->option;
+                } elseif (str_contains($variantName, 'size') || str_contains($variantName, 'kích') || str_contains($variantName, 'kich')) {
+                    $selectedSize = $opt->option;
+                } else {
+                    // Fallback: if only one slot is available, fill it
+                    if ($selectedSize === null) {
+                        $selectedSize = $opt->option;
+                    } elseif ($selectedColor === null) {
+                        $selectedColor = $opt->option;
+                    }
+                }
+            }
 
             // Lấy giỏ hàng hiện tại hoặc tạo mới
             $cart = Cart::firstOrCreate([
@@ -41,46 +101,58 @@ class CartController extends Controller
                 'session_id' => session()->getId()
             ]);
 
-            // Kiểm tra sản phẩm với biến thể đã tồn tại trong giỏ hàng chưa
-            $existingCartItem = $cart->items->where('product_id', $productId)
-                ->where('variant_option_id', $variantOption->id)
+            // Kiểm tra sản phẩm với combo (color/size) đã tồn tại trong giỏ hàng chưa
+            $existingCartItem = $cart->items()
+                ->where('product_id', $productId)
+                ->where('color', $selectedColor)
+                ->where('size', $selectedSize)
                 ->first();
 
             if ($existingCartItem) {
                 $newQuantity = $existingCartItem->quantity + $quantity;
 
-                // Kiểm tra tồn kho
-                if ($newQuantity > $variantOption->quantity) {
-                    return redirect()->back()->with('error', 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $variantOption->quantity . ' sản phẩm.');
+                // Kiểm tra tồn kho theo combo nếu có
+                $maxStock = $variants->isEmpty() || $isDefaultBasicSelection
+                    ? (int) ($product->quantity ?? 0)
+                    : $this->resolveMaxStock($product->id, $selectedColor, $selectedSize, $selectedOptions);
+                if ($maxStock !== null && $newQuantity > $maxStock) {
+                    return redirect()->back()->with('error', 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $maxStock . ' sản phẩm.');
                 }
 
-                $totalPrice = ($product->price + $variantOption->price_modifier) * $newQuantity;
+                $priceModifierSum = $selectedOptions->sum('price_modifier');
+                $totalPrice = ((float) $product->price + (float) $priceModifierSum) * $newQuantity;
 
                 $existingCartItem->update([
                     'quantity' => $newQuantity,
                     'price'    => $totalPrice
                 ]);
             } else {
-                // Kiểm tra tồn kho
-                if ($quantity > $variantOption->quantity) {
-                    return redirect()->back()->with('error', 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $variantOption->quantity . ' sản phẩm.');
+                $maxStock = $variants->isEmpty() || $isDefaultBasicSelection
+                    ? (int) ($product->quantity ?? 0)
+                    : $this->resolveMaxStock($product->id, $selectedColor, $selectedSize, $selectedOptions);
+                if ($maxStock !== null && $quantity > $maxStock) {
+                    return redirect()->back()->with('error', 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $maxStock . ' sản phẩm.');
                 }
 
-                $totalPrice = ($product->price + $variantOption->price_modifier) * $quantity;
+                $priceModifierSum = $selectedOptions->sum('price_modifier');
+                $totalPrice = ((float) $product->price + (float) $priceModifierSum) * $quantity;
 
                 // Tạo dữ liệu giỏ hàng
                 $cartItemData = [
                     'product_id'        => $productId,
-                    'variant_id'        => $variantOption->variant_id,
-                    'variant_option_id' => $variantOption->id,
+                    'variant_id'        => null,
+                    'variant_option_id' => null,
+                    'color'             => $selectedColor,
+                    'size'              => $selectedSize,
                     'quantity'          => $quantity,
                     'price'             => $totalPrice,
                 ];
 
                 $cart->items()->updateOrCreate(
                     [
-                        'product_id'        => $productId,
-                        'variant_option_id' => $variantOption->id,
+                        'product_id' => $productId,
+                        'color'      => $selectedColor,
+                        'size'       => $selectedSize,
                     ],
                     $cartItemData
                 );
@@ -91,13 +163,38 @@ class CartController extends Controller
         }
     }
 
+    private function resolveMaxStock(int $productId, ?string $color, ?string $size, $selectedOptions): ?int
+    {
+        // Prefer combo stock from product_variants table if it exists.
+        $pvQuery = ProductVariant::query()->where('product_id', $productId);
+        if ($pvQuery->exists() && ($color !== null || $size !== null)) {
+            $pv = ProductVariant::query()
+                ->where('product_id', $productId)
+                ->when($color !== null, fn ($q) => $q->where('color', $color))
+                ->when($size !== null, fn ($q) => $q->where('size', $size))
+                ->first();
+
+            if ($pv) {
+                return (int) $pv->stock;
+            }
+        }
+
+        // Fallback: minimum stock among selected variant options (best-effort).
+        if ($selectedOptions && method_exists($selectedOptions, 'min')) {
+            $min = $selectedOptions->min('quantity');
+            return $min !== null ? (int) $min : null;
+        }
+
+        return null;
+    }
+
     // Xóa sản phẩm khỏi giỏ hàng
     public function removeProduct($cartItemId)
     {
         try {
             $cart = Auth::check()
-                ? Cart::where('user_id', Auth::user()->id)->first()
-                : Cart::where('session_id', session()->getId())->first();
+                ? Cart::where('user_id', Auth::id())->latest('updated_at')->first()
+                : Cart::where('session_id', session()->getId())->latest('updated_at')->first();
 
             if ($cart) {
                 $cartItem = $cart->items()->where('id', $cartItemId)->first();
@@ -120,8 +217,8 @@ class CartController extends Controller
             ]);
 
             $cart = Auth::check()
-                ? Cart::where('user_id', Auth::user()->id)->first()
-                : Cart::where('session_id', session()->getId())->first();
+                ? Cart::where('user_id', Auth::id())->latest('updated_at')->first()
+                : Cart::where('session_id', session()->getId())->latest('updated_at')->first();
 
             if (!$cart) {
                 return response()->json(['message' => 'Giỏ hàng không tồn tại.'], 404);
@@ -139,15 +236,33 @@ class CartController extends Controller
             $requestedQty = (int) $data['quantity'];
             $variantOption = $cartItem->variantOption;
 
-            if ($variantOption && $requestedQty > (int) $variantOption->quantity) {
+            // Stock check: prefer combo stock (product_variants) when color/size exists
+            $maxStock = null;
+            if ($cartItem->color || $cartItem->size) {
+                $pv = ProductVariant::query()
+                    ->where('product_id', $cartItem->product_id)
+                    ->when($cartItem->color, fn ($q) => $q->where('color', $cartItem->color))
+                    ->when($cartItem->size, fn ($q) => $q->where('size', $cartItem->size))
+                    ->first();
+                if ($pv) {
+                    $maxStock = (int) $pv->stock;
+                }
+            } elseif ($variantOption) {
+                $maxStock = (int) $variantOption->quantity;
+            } else {
+                // Basic product (no variants)
+                $maxStock = $cartItem->product ? (int) ($cartItem->product->quantity ?? 0) : null;
+            }
+
+            if ($maxStock !== null && $requestedQty > $maxStock) {
                 throw ValidationException::withMessages([
-                    'quantity' => 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $variantOption->quantity . ' sản phẩm.',
+                    'quantity' => 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $maxStock . ' sản phẩm.',
                 ]);
             }
 
-            $product = $cartItem->product;
-            $priceModifier = $variantOption ? (float) $variantOption->price_modifier : 0;
-            $unitPrice = ((float) $product->price) + $priceModifier;
+            // Keep pricing consistent by using stored unit price
+            $currentQty = max(1, (int) $cartItem->quantity);
+            $unitPrice = ((float) $cartItem->price) / $currentQty;
             $linePrice = $unitPrice * $requestedQty;
 
             $cartItem->update([

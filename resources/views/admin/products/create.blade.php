@@ -64,6 +64,16 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="quantity" class="form-label">Tồn kho (dùng cho sản phẩm không có biến thể)</label>
+                                <input type="number" class="form-control @error('quantity') is-invalid @enderror"
+                                    name="quantity" id="quantity" min="0" placeholder="Nhập số lượng tồn"
+                                    value="{{ old('quantity', 0) }}" />
+                                @error('quantity')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="short_description" class="form-label">Mô tả ngắn</label>
                                 <textarea name="short_description" id="short_description"
                                     class="form-control @error('short_description') is-invalid @enderror" rows="2"
@@ -125,6 +135,15 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            <div class="col-md-2">
+                                                <label class="small text-muted">Số lượng</label>
+                                                <input type="number" name="variant_options[{{ $index }}][quantity]"
+                                                    class="form-control @error("variant_options.$index.quantity") is-invalid @enderror"
+                                                    min="0" value="{{ $option['quantity'] ?? 0 }}">
+                                                @error("variant_options.$index.quantity")
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                             <div class="col-md-2 d-flex align-items-end">
                                                 <button type="button" class="btn btn-outline-danger w-100 remove-option" 
                                                     {{ count(old('variant_options')) == 1 ? 'disabled' : '' }}>
@@ -139,9 +158,13 @@
                                             <label class="small text-muted">Giá trị (VD: L, XL, Đỏ...)</label>
                                             <input type="text" name="variant_options[0][option]" class="form-control" placeholder="Giá trị">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="small text-muted">Phụ phí (VND)</label>
                                             <input type="number" name="variant_options[0][price_modifier]" class="form-control" value="0">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted">Số lượng</label>
+                                            <input type="number" name="variant_options[0][quantity]" class="form-control" min="0" value="0">
                                         </div>
                                         <div class="col-md-2 d-flex align-items-end">
                                             <button type="button" class="btn btn-outline-danger w-100 remove-option" disabled>
@@ -209,8 +232,11 @@
                 <div class="col-md-6">
                     <input type="text" name="variant_options[${optionIndex}][option]" class="form-control" placeholder="Giá trị">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <input type="number" name="variant_options[${optionIndex}][price_modifier]" class="form-control" value="0">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="variant_options[${optionIndex}][quantity]" class="form-control" min="0" value="0">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="button" class="btn btn-outline-danger w-100 remove-option">

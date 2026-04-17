@@ -43,6 +43,8 @@
                                 placeholder="Option (e.g., Red)" value="{{ old('options.' . $key . '.option', $option->option) }}">
                             <input type="number" class="form-control mb-2" name="options[{{ $key }}][price_modifier]"
                                 placeholder="Price Modifier" step="0.01" value="{{ old('options.' . $key . '.price_modifier', $option->price_modifier) }}">
+                            <input type="number" class="form-control mb-2" name="options[{{ $key }}][quantity]"
+                                placeholder="Quantity" min="0" value="{{ old('options.' . $key . '.quantity', $option->quantity ?? 0) }}">
                         </div>
                     @endforeach
                 </div>

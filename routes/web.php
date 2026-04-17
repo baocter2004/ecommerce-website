@@ -7,13 +7,14 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VariantController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Auth\AuthenController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
-use App\Http\Controllers\Client\OrderController as ClientOrderController;
-use App\Http\Controllers\Client\WishlistController;
 use App\Http\Controllers\Client\CommentController;
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\ProfileController;
+use App\Http\Controllers\Client\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,17 +28,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
 // auth
 Route::controller(AuthenController::class)
     ->group(function () {
-        Route::get('register',  'showFormRegister')->name('register');
-        Route::post('register',  'handleRegister');
+        Route::get('register', 'showFormRegister')->name('register');
+        Route::post('register', 'handleRegister');
 
-        Route::get('login',  'showFormLogin')->name('login');
-        Route::post('login',  'handleLogin');
+        Route::get('login', 'showFormLogin')->name('login');
+        Route::post('login', 'handleLogin');
 
-        Route::post('logout',  'logout')->name('logout');
+        Route::post('logout', 'logout')->name('logout');
     });
 
 // admin
@@ -47,8 +47,10 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('profile', [AdminProfileController::class, 'index'])->name('profile');
+        Route::put('profile', [AdminProfileController::class, 'update'])->name('profile.update');
 
-        // Đường dẫn của CRUD users 
+        // Đường dẫn của CRUD users
         Route::prefix('users')
             ->name('users.')
             ->controller(UserController::class)
@@ -84,7 +86,6 @@ Route::prefix('admin')
                 Route::delete('{category}/forcedestroy', 'forceDestroy')->name('forcedestroy');
                 Route::post('{category}/restore', 'restore')->name('restore');
             });
-
 
         //Đường Dẫn của CRUD products
         Route::prefix('products')
@@ -138,7 +139,6 @@ Route::prefix('admin')
                 Route::delete('/{comment}', 'destroy')->name('destroy');
             });
     });
-
 
 // client
 

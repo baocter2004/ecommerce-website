@@ -66,7 +66,8 @@ class ProductController extends Controller
                         if (!empty($option['option'])) {
                             $variant->options()->create([
                                 'option' => $option['option'],
-                                'price_modifier' => $option['price_modifier'] ?? 0
+                                'price_modifier' => $option['price_modifier'] ?? 0,
+                                'quantity' => $option['quantity'] ?? 0,
                             ]);
                         }
                     }
@@ -89,7 +90,12 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category:name,id', 'variants.options:variant_id,price_modifier,option']);
+        $product->load([
+            'category:id,name',
+            'variants:id,product_id,name',
+            'variants.options:id,variant_id,option,price_modifier,quantity',
+            'productVariants:id,product_id,color,size,stock',
+        ]);
 
         return view('admin.products.show', compact('product'));
     }
@@ -152,7 +158,8 @@ class ProductController extends Controller
                         if (!empty($option['option'])) {
                             $variant->options()->create([
                                 'option' => $option['option'],
-                                'price_modifier' => $option['price_modifier'] ?? 0
+                                'price_modifier' => $option['price_modifier'] ?? 0,
+                                'quantity' => $option['quantity'] ?? 0,
                             ]);
                         }
                     }

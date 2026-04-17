@@ -80,9 +80,18 @@
                                         <div class="pr-3">
                                             <span class="text-black">{{ $item->product->product_name }}</span>
                                             <strong class="mx-1">x</strong> {{ $item->quantity }}
-                                            @if ($item->variantOption)
+                                            @if ($item->color || $item->size)
                                                 <small class="text-primary d-block mt-1">
-                                                    {{ $item->variant->name }}: {{ $item->variantOption->option }}
+                                                    @if ($item->size)
+                                                        <span class="mr-2">Size: {{ $item->size }}</span>
+                                                    @endif
+                                                    @if ($item->color)
+                                                        <span>Màu: {{ $item->color }}</span>
+                                                    @endif
+                                                </small>
+                                            @elseif ($item->variantOption)
+                                                <small class="text-primary d-block mt-1">
+                                                    {{ optional($item->variant)->name }}: {{ $item->variantOption->option }}
                                                 </small>
                                             @endif
                                         </div>

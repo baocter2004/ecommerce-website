@@ -29,6 +29,8 @@
                             placeholder="Option (e.g., Red)">
                         <input type="number" class="form-control mb-2" name="options[0][price_modifier]"
                             placeholder="Price Modifier" step="0.01">
+                        <input type="number" class="form-control mb-2" name="options[0][quantity]"
+                            placeholder="Quantity" min="0" value="0">
                     </div>
                 </div>
                 <button type="button" id="add-option" class="btn btn-secondary mt-2">Add Option</button>
@@ -52,6 +54,7 @@
             optionGroup.innerHTML = `
                 <input type="text" class="form-control mb-2" name="options[${optionIndex}][option]" placeholder="Option (e.g., Red)">
                 <input type="number" class="form-control mb-2" name="options[${optionIndex}][price_modifier]" placeholder="Price Modifier" step="0.01">
+                <input type="number" class="form-control mb-2" name="options[${optionIndex}][quantity]" placeholder="Quantity" min="0" value="0">
             `;
             document.getElementById('variant-options').appendChild(optionGroup);
             optionIndex++;

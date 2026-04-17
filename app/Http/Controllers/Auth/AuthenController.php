@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class AuthenController extends Controller
 {
@@ -14,6 +13,7 @@ class AuthenController extends Controller
     {
         return view('auth.register');
     }
+
     public function handleRegister(StoreUserRequest $request)
     {
         $data = $request->validated();
@@ -31,13 +31,15 @@ class AuthenController extends Controller
 
             return redirect()->route('client.index')->with('success', 'Đăng ký tài khoản thành công!');
         } catch (\Throwable $th) {
-            return back()->withErrors(['register' => 'Đăng ký thất bại: ' . $th->getMessage()])->withInput();
+            return back()->withErrors(['register' => 'Đăng ký thất bại: '.$th->getMessage()])->withInput();
         }
     }
+
     public function showFormLogin()
     {
         return view('auth.login');
     }
+
     public function handleLogin()
     {
         $credentials = request()->validate([
@@ -64,6 +66,7 @@ class AuthenController extends Controller
             'email' => 'Email hoặc mật khẩu không chính xác.',
         ])->onlyInput('email');
     }
+
     public function logout()
     {
         Auth::logout();

@@ -46,6 +46,7 @@ class VariantController extends Controller
             'options' => 'required|array|min:1',
             'options.*.option' => 'required|string|max:255',
             'options.*.price_modifier' => 'nullable|numeric|min:0',
+            'options.*.quantity' => 'required|integer|min:0',
         ]);
 
         // dd($validatedData);
@@ -64,6 +65,7 @@ class VariantController extends Controller
                 $variant->options()->create([
                     'option' => $option['option'],
                     'price_modifier' => $option['price_modifier'] ?? 0,
+                    'quantity' => $option['quantity'] ?? 0,
                 ]);
             }
 
@@ -116,6 +118,7 @@ class VariantController extends Controller
             'options' => 'required|array|min:1',
             'options.*.option' => 'required|string|max:255',
             'options.*.price_modifier' => 'nullable|numeric|min:0',
+            'options.*.quantity' => 'required|integer|min:0',
         ]);
 
         try {
@@ -134,6 +137,7 @@ class VariantController extends Controller
                 $variant->options()->create([
                     'option' => $option['option'],
                     'price_modifier' => $option['price_modifier'] ?? 0,
+                    'quantity' => $option['quantity'] ?? 0,
                 ]);
             }
 
