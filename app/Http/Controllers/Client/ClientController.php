@@ -18,43 +18,57 @@ class ClientController extends Controller
 
         $categories = Category::get(['id', 'name','category_image'])->take(3);
 
-        $featured_products = $this->getFeaturedProduct(5);
+        // Lấy sản phẩm yêu thích nhất (Top Favorited)
+        $featured_products = $this->getFeaturedProduct(8, 'favorites');
 
         return view('client.index', compact('products', 'featured_products', 'categories'));
     }
     public function shopSingle(string $id)
     {
-        $product = Product::findOrFail($id);
-
-        // dd($product);
+        $product = Product::with(['category', 'variants.options', 'comments.user'])->findOrFail($id);
 
         if ($product) {
             View::create(['product_id' => $product->id]);
         }
 
-        $featured_products = $this->getFeaturedProduct(10);
+        $featured_products = $this->getFeaturedProduct(10, 'favorites');
 
         return view('client.shop-single', compact('product', 'featured_products'));
     }
 
     public function shop(Request $request)
     {
-        $category_id = $request->input('category_id');;
+        $category_id = $request->input('category_id');
+        $keyword = $request->input('keyword');
+        $min_price = $request->input('min_price');
+        $max_price = $request->input('max_price');
 
         $query = Product::with(['category', 'variants.options']);
 
-        // Thêm điều kiện lọc theo danh mục
+        // Lọc theo danh mục
         if ($category_id) {
             $query->where('category_id', $category_id);
         }
 
-        $products = $query->latest('id')
-            ->latest('id')
-            ->paginate(6);
+        // Tìm kiếm theo tên
+        if ($keyword) {
+            $query->where('product_name', 'LIKE', "%{$keyword}%");
+        }
+
+        // Lọc theo khoảng giá
+        if ($min_price) {
+            $query->where('price', '>=', $min_price);
+        }
+        if ($max_price) {
+            $query->where('price', '<=', $max_price);
+        }
+
+        $products = $query->latest('id')->paginate(9);
 
         $categories = Category::get(['id', 'name']);
-
-        $featured_products = $this->getFeaturedProduct(5);
+        
+        // Lấy sản phẩm yêu thích nhất (Top Favorited)
+        $featured_products = $this->getFeaturedProduct(5, 'favorites');
 
         return view('client.shop', compact('products', 'featured_products', 'categories'));
     }
@@ -89,10 +103,12 @@ class ClientController extends Controller
     public function getFeaturedProduct($limit, $type = '')
     {
         $query = Product::query();
-        if ($type === 'views') {
+        
+        if ($type === 'favorites') {
+            // Lấy sản phẩm được nhiều người "Tim" nhất
+            $query->withCount('favorites')->orderBy('favorites_count', 'desc');
+        } elseif ($type === 'views') {
             $query->withCount('views')->orderBy('views_count', 'desc');
-        } elseif ($type === 'sales') {
-            $query->withCount('sales')->orderBy('sales_count', 'desc');
         } else {
             $query->withCount('views')->orderBy('views_count', 'desc');
         }

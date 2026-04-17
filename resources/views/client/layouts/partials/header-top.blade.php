@@ -57,13 +57,31 @@
                         </li>
 
                         <!-- Wishlist Icon -->
-                        <li class="me-3"><a href="#"><span class="icon icon-heart-o"></span></a></li>
+                        <li class="me-3">
+                            <a href="{{ route('client.wishlist') }}" class="position-relative">
+                                <span class="icon icon-heart-o"></span>
+                                @auth
+                                    @php
+                                        $wishlistCount = \App\Models\Favorite::where('user_id', Auth::id())->count();
+                                    @endphp
+                                    @if($wishlistCount > 0)
+                                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill" style="font-size: 0.6rem;" id="wishlist-count">
+                                            {{ $wishlistCount }}
+                                        </span>
+                                    @endif
+                                @endauth
+                            </a>
+                        </li>
 
                         <!-- Cart Icon -->
                         <li>
-                            <a href="cart.html" class="site-cart">
+                            <a href="{{ route('client.cart') }}" class="site-cart">
                                 <span class="icon icon-shopping_cart"></span>
-                                <span class="count">2</span>
+                                @php
+                                    $cart = \App\Models\Cart::where(Auth::check() ? 'user_id' : 'session_id', Auth::check() ? Auth::id() : session()->getId())->first();
+                                    $cartCount = $cart ? $cart->items->sum('quantity') : 0;
+                                @endphp
+                                <span class="count">{{ $cartCount }}</span>
                             </a>
                         </li>
                     </ul>

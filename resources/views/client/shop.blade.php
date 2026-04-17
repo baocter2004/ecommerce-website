@@ -61,25 +61,39 @@
                     <div class="row mb-5">
                         @foreach ($products as $product)
                             <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
-                                <div class="block-4 text-center border">
+                                <div class="block-4 text-center border position-relative">
+                                    <div class="position-absolute" style="top: 10px; right: 10px; z-index: 10;">
+                                        @auth
+                                            @php
+                                                $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())->where('product_id', $product->id)->exists();
+                                            @endphp
+                                            <button type="button" 
+                                                class="btn btn-sm btn-light rounded-circle shadow-sm favorite-btn" 
+                                                data-product-id="{{ $product->id }}"
+                                                title="{{ $isFavorited ? 'Bỏ yêu thích' : 'Yêu thích' }}">
+                                                <i class="bi {{ $isFavorited ? 'bi-heart-fill text-danger' : 'bi-heart text-muted' }}"></i>
+                                            </button>
+                                        @else
+                                            <a href="{{ route('login') }}" class="btn btn-sm btn-light rounded-circle shadow-sm" title="Đăng nhập để yêu thích">
+                                                <i class="bi bi-heart text-muted"></i>
+                                            </a>
+                                        @endauth
+                                    </div>
                                     <figure class="block-4-image">
                                         <a href="{{ route('client.shop-single', $product->id) }}"><img
                                                 src="{{ Storage::url($product->product_image) }}" alt="Image placeholder"
                                                 class="img-fluid"></a>
                                     </figure>
                                     <div class="block-4-text p-4">
-                                        <h3>
+                                        <h3 class="mb-2">
                                             <a
-                                                href="{{ route('client.shop-single', $product->id) }}">{{ Str::limit($product->product_name, 15) }}</a>
+                                                href="{{ route('client.shop-single', $product->id) }}">{{ Str::limit($product->product_name, 20) }}</a>
                                         </h3>
-                                        <p class="mb-0">{{ Str::limit($product->short_description, 25) }}</p>
-                                        <p class="text-primary font-weight-bold">
+                                        <p class="mb-2 small text-muted">{{ Str::limit($product->short_description, 30) }}</p>
+                                        <p class="text-primary font-weight-bold mb-0">
                                             @php
-                                                // Khởi tạo các biến giá trị tối thiểu và tối đa từ giá biến thể
                                                 $minPrice = null;
                                                 $maxPrice = null;
-
-                                                // Duyệt qua các variant và tìm giá nhỏ nhất và lớn nhất từ options
                                                 foreach ($product->variants as $variant) {
                                                     foreach ($variant->options as $option) {
                                                         if ($minPrice === null || $option->price_modifier < $minPrice) {
@@ -93,14 +107,14 @@
                                             @endphp
 
                                             @if ($minPrice !== null && $maxPrice !== null)
-                                                <span class="badge bg-light text-dark">
-                                                    Giá: {{ number_format($minPrice + $product->price, 0, ',', '.') }} VND
+                                                <span class="text-dark">
+                                                    {{ number_format($minPrice + $product->price, 0, ',', '.') }}đ
                                                     -
-                                                    {{ number_format($maxPrice + $product->price, 0, ',', '.') }} VND
+                                                    {{ number_format($maxPrice + $product->price, 0, ',', '.') }}đ
                                                 </span>
                                             @else
-                                                <span class="badge bg-light text-dark">
-                                                    Giá: {{ number_format($product->price, 0, ',', '.') }} VND
+                                                <span class="text-dark">
+                                                    {{ number_format($product->price, 0, ',', '.') }} VND
                                                 </span>
                                             @endif
                                         </p>
@@ -109,6 +123,8 @@
                             </div>
                         @endforeach
                     </div>
+
+                    </div>
                     <div class="row" data-aos="fade-up">
                         <div class="col-md-12 text-center">
                             <div class="site-block-27">
@@ -116,64 +132,59 @@
                             </div>
                         </div>
                     </div>
-                </div>
                 <div class="col-md-3 order-1 mb-5 mb-md-0">
                     <div class="border p-4 rounded mb-4">
-                        <h3 class="mb-3 h6 text-uppercase text-black d-block">Categories</h3>
+                        <h3 class="mb-3 h6 text-uppercase text-black d-block">Tìm kiếm</h3>
+                        <form action="{{ route('client.shop') }}" method="GET">
+                            <div class="input-group">
+                                <input type="text" name="keyword" class="form-control border-0 bg-light" placeholder="Tên sản phẩm..." value="{{ request('keyword') }}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-search"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="border p-4 rounded mb-4">
+                        <h3 class="mb-3 h6 text-uppercase text-black d-block">Danh mục</h3>
                         <ul class="list-unstyled mb-0">
-                            <li class="mb-1"><a href="#" class="d-flex"><span>Men</span> <span
-                                        class="text-black ml-auto">(2,220)</span></a></li>
-                            <li class="mb-1"><a href="#" class="d-flex"><span>Women</span> <span
-                                        class="text-black ml-auto">(2,550)</span></a></li>
-                            <li class="mb-1"><a href="#" class="d-flex"><span>Children</span> <span
-                                        class="text-black ml-auto">(2,124)</span></a></li>
+                            @foreach ($categories as $category)
+                                <li class="mb-1">
+                                    <a href="{{ route('client.shop', ['category_id' => $category->id]) }}" class="d-flex {{ request('category_id') == $category->id ? 'text-primary font-weight-bold' : '' }}">
+                                        <span>{{ $category->name }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                            <li class="mt-2 pt-2 border-top">
+                                <a href="{{ route('client.shop') }}" class="small text-muted">Xóa lọc danh mục</a>
+                            </li>
                         </ul>
                     </div>
+
                     <div class="border p-4 rounded mb-4">
-                        <div class="mb-4">
-                            <h3 class="mb-3 h6 text-uppercase text-black d-block">Filter by Price</h3>
-                            <div id="slider-range" class="border-primary"></div>
-                            <input type="text" name="text" id="amount" class="form-control border-0 pl-0 bg-white"
-                                disabled="" />
-                        </div>
-
-                        <div class="mb-4">
-                            <h3 class="mb-3 h6 text-uppercase text-black d-block">Size</h3>
-                            <label for="s_sm" class="d-flex">
-                                <input type="checkbox" id="s_sm" class="mr-2 mt-1"> <span class="text-black">Small
-                                    (2,319)</span>
-                            </label>
-                            <label for="s_md" class="d-flex">
-                                <input type="checkbox" id="s_md" class="mr-2 mt-1"> <span class="text-black">Medium
-                                    (1,282)</span>
-                            </label>
-                            <label for="s_lg" class="d-flex">
-                                <input type="checkbox" id="s_lg" class="mr-2 mt-1"> <span class="text-black">Large
-                                    (1,392)</span>
-                            </label>
-                        </div>
-
-                        <div class="mb-4">
-                            <h3 class="mb-3 h6 text-uppercase text-black d-block">Color</h3>
-                            <a href="#" class="d-flex color-item align-items-center">
-                                <span class="bg-danger color d-inline-block rounded-circle mr-2"></span> <span
-                                    class="text-black">Red (2,429)</span>
-                            </a>
-                            <a href="#" class="d-flex color-item align-items-center">
-                                <span class="bg-success color d-inline-block rounded-circle mr-2"></span> <span
-                                    class="text-black">Green (2,298)</span>
-                            </a>
-                            <a href="#" class="d-flex color-item align-items-center">
-                                <span class="bg-info color d-inline-block rounded-circle mr-2"></span> <span
-                                    class="text-black">Blue (1,075)</span>
-                            </a>
-                            <a href="#" class="d-flex color-item align-items-center">
-                                <span class="bg-primary color d-inline-block rounded-circle mr-2"></span> <span
-                                    class="text-black">Purple (1,075)</span>
-                            </a>
-                        </div>
-
+                        <h3 class="mb-3 h6 text-uppercase text-black d-block">Lọc theo giá</h3>
+                        <form action="{{ route('client.shop') }}" method="GET">
+                            @if(request('category_id'))
+                                <input type="hidden" name="category_id" value="{{ request('category_id') }}">
+                            @endif
+                            @if(request('keyword'))
+                                <input type="hidden" name="keyword" value="{{ request('keyword') }}">
+                            @endif
+                            
+                            <div class="form-group mb-2">
+                                <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Giá từ..." value="{{ request('min_price') }}">
+                            </div>
+                            <div class="form-group mb-3">
+                                <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Đến giá..." value="{{ request('max_price') }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm btn-block">Lọc giá</button>
+                        </form>
                     </div>
+
+                    <div class="text-center">
+                        <a href="{{ route('client.shop') }}" class="btn btn-outline-secondary btn-sm">Xóa tất cả lọc</a>
+                    </div>
+                </div>
                 </div>
             </div>
 

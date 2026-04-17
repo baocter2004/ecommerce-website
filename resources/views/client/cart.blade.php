@@ -4,143 +4,161 @@
     <div class="bg-light py-3">
         <div class="container">
             <div class="row">
-                <div class="col-md-12 mb-0"><a href="index.html">Home</a> <span class="mx-2 mb-0">/</span> <strong
-                        class="text-black">Cart</strong></div>
+                <div class="col-md-12 mb-0">
+                    <a href="{{ route('client.index') }}">Trang chủ</a> 
+                    <span class="mx-2 mb-0">/</span> 
+                    <strong class="text-black">Giỏ hàng</strong>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="site-section">
         <div class="container">
+            @if(session('success'))
+                <div class="alert alert-success border-0 mb-4 shadow-sm">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <div class="row mb-5">
-                <div class="col-md-12" method="post">
-                    <div class="site-blocks-table">
-                        <table class="table table-bordered">
+                <div class="col-md-12">
+                    <div class="site-blocks-table shadow-sm rounded overflow-hidden">
+                        <table class="table table-bordered mb-0">
                             <thead>
-                                <tr>
-                                    <th class="product-thumbnail">Image</th>
-                                    <th class="product-name">Product</th>
-                                    <th class="product-price">Price</th>
-                                    <th class="product-quantity">Quantity</th>
-                                    <th class="product-total">Total</th>
-                                    <th class="product-remove">Remove</th>
+                                <tr class="bg-light">
+                                    <th class="product-thumbnail">Hình ảnh</th>
+                                    <th class="product-name">Sản phẩm</th>
+                                    <th class="product-price">Giá (Đơn vị)</th>
+                                    <th class="product-quantity">Số lượng</th>
+                                    <th class="product-total">Thành tiền</th>
+                                    <th class="product-remove">Xóa</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($cart_items as $cart_item)
+                                @forelse ($cart_items as $cart_item)
                                     <tr>
                                         <td class="product-thumbnail">
                                             <img src="{{ Storage::url($cart_item->product->product_image) }}" alt="Image"
-                                                class="img-fluid">
+                                                class="img-fluid" style="max-width: 80px;">
                                         </td>
-                                        <td class="product-name">
-                                            <h2 class="h5 text-black">{{ $cart_item->product->product_name }}</h2>
+                                        <td class="product-name text-left pl-4">
+                                            <h2 class="h5 text-black mb-1">{{ $cart_item->product->product_name }}</h2>
+                                            @if($cart_item->variantOption)
+                                                <small class="text-primary d-block">
+                                                    {{ $cart_item->variant->name }}: {{ $cart_item->variantOption->option }}
+                                                </small>
+                                            @endif
                                         </td>
-                                        <td>{{ number_format($cart_item->price, 0, ',', '.') }} VND</td>
                                         <td>
-
-                                            <div class="input-group mb-3" style="max-width: 120px;">
+                                            @php
+                                                $unitPrice = $cart_item->price / $cart_item->quantity;
+                                            @endphp
+                                            {{ number_format($unitPrice, 0, ',', '.') }}đ
+                                        </td>
+                                        <td>
+                                            <div class="input-group mb-0 mx-auto" style="max-width: 120px;">
                                                 <div class="input-group-prepend">
-                                                    <button class="btn btn-outline-primary js-btn-minus"
-                                                        type="button">&minus;</button>
+                                                    <button class="btn btn-outline-primary btn-sm js-btn-minus" type="button">&minus;</button>
                                                 </div>
-                                                <input type="text" class="form-control text-center"
-                                                    value="{{ $cart_item->quantity }}" name="quantity" placeholder=""
-                                                    aria-label="Quantity">
+                                                <input type="text" class="form-control text-center form-control-sm"
+                                                    value="{{ $cart_item->quantity }}" readonly>
                                                 <div class="input-group-append">
-                                                    <button class="btn btn-outline-primary js-btn-plus"
-                                                        type="button">&plus;</button>
+                                                    <button class="btn btn-outline-primary btn-sm js-btn-plus" type="button">&plus;</button>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ number_format($cart_item->price * $cart_item->quantity, 0, ',', '.') }}
-                                            VND</td>
+                                        <td class="font-weight-bold text-dark">
+                                            {{ number_format($cart_item->price, 0, ',', '.') }}đ
+                                        </td>
                                         <td>
-                                            <form action="{{ route('client.cart.remove', $cart_item->id) }}" method="POST">
+                                            <form action="{{ route('client.cart.remove', $cart_item->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger mt-2"
-                                                    onclick="return confirm('Do You Want to Delete this Item?')">X</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                                    <span class="icon icon-trash"></span>
+                                                </button>
                                             </form>
-
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <p class="text-muted">Giỏ hàng của bạn đang trống.</p>
+                                            <a href="{{ route('client.shop') }}" class="btn btn-primary btn-sm">Tiếp tục mua sắm</a>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="row mb-5">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <button class="btn btn-primary btn-sm btn-block">Update Cart</button>
+            @if($cart_items->count() > 0)
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row mb-5">
+                            <div class="col-md-6">
+                                <a href="{{ route('client.shop') }}" class="btn btn-outline-primary btn-sm btn-block">TIẾP TỤC MUA SẮM</a>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <a href="{{ route('client.shop') }}" class="btn btn-outline-primary btn-sm btn-block">Continue
-                                Shopping</a>
+                        <div class="card border-0 shadow-sm bg-light">
+                            <div class="card-body">
+                                <label class="text-black h4 mb-3" for="coupon">Mã giảm giá</label>
+                                <p>Nhập mã giảm giá nếu bạn có.</p>
+                                <div class="row">
+                                    <div class="col-md-8 mb-3 mb-md-0">
+                                        <input type="text" class="form-control py-3" id="coupon" placeholder="Mã giảm giá">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-primary btn-sm btn-block py-3">ÁP DỤNG</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <label class="text-black h4" for="coupon">Coupon</label>
-                            <p>Enter your coupon code if you have one.</p>
-                        </div>
-                        <div class="col-md-8 mb-3 mb-md-0">
-                            <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-primary btn-sm">Apply Coupon</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 pl-5">
-                    <div class="row justify-content-end">
-                        <div class="col-md-7">
-                            <div class="row">
-                                <div class="col-md-12 text-right border-bottom mb-5">
-                                    <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
+                    <div class="col-md-6 pl-md-5">
+                        <div class="row justify-content-end">
+                            <div class="col-md-7">
+                                <div class="row">
+                                    <div class="col-md-12 text-right border-bottom mb-4">
+                                        <h3 class="text-black h4 text-uppercase font-weight-bold">Tổng giỏ hàng</h3>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <span class="text-black">Subtotal</span>
+                                @php
+                                    $cartSubtotal = $cart_items->sum('price');
+                                @endphp
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <span class="text-black">Tạm tính</span>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <strong class="text-black">{{ number_format($cartSubtotal, 0, ',', '.') }}đ</strong>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 text-right">
-                                    <strong id="subtotal-price" class="text-black">$230.00</strong>
+                                <div class="row mb-5">
+                                    <div class="col-md-6">
+                                        <span class="text-black h5 font-weight-bold">Tổng cộng</span>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <strong class="text-primary h5 font-weight-bold">{{ number_format($cartSubtotal, 0, ',', '.') }}đ</strong>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row mb-5">
-                                <div class="col-md-6">
-                                    <span class="text-black">Total</span>
-                                </div>
-                                <div class="col-md-6 text-right">
-                                    <strong id="total-price" class="text-black">$230.00</strong>
-                                </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <button class="btn btn-primary btn-lg py-3 btn-block" type="submit"
-                                        onclick="window.location='{{ route('client.checkout') }}'">
-                                        Proceed To Checkout
-                                    </button>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <a href="{{ route('client.checkout') }}" class="btn btn-primary btn-lg py-3 btn-block font-weight-bold">
+                                            TIẾN HÀNH THANH TOÁN
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var subtotalPrice = document.getElementById('subtotal-price');
-            var totalPrice = document.getElementById('total-price');
-
-            console.log(subtotalPrice, totalPrice);
-        })
-    </script>
 @endsection

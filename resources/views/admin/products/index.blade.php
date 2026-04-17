@@ -70,66 +70,61 @@
                         <td>{{ number_format($product->price, 0, ',', '.') }} VND</td>
                         <td>
                             @foreach ($product->variants as $variant)
-                                @if ($variant->name === 'Size')
-                                    <span class="badge bg-secondary">{{ $variant->name }}:</span>
-                                    @foreach ($variant->options as $option)
-                                        <span class="badge bg-light text-dark mt-2">
-                                            {{ $option->option }} -
-                                            {{ number_format($option->price_modifier, 0, ',', '.') }} VND
-                                        </span>
-                                    @endforeach
-                                @endif
+                                <div class="mb-1">
+                                    <span class="badge badge-info">{{ $variant->name }}:</span>
+                                    <div class="d-flex flex-wrap justify-content-center">
+                                        @foreach ($variant->options as $option)
+                                            <span class="badge badge-light border m-1" data-toggle="tooltip" title="+{{ number_format($option->price_modifier, 0, ',', '.') }} VND">
+                                                {{ $option->option }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endforeach
                         </td>
                         <td>
-                            <img src="{{ Storage::url($product->product_image) }}" class="img-thumbnail" alt="Chưa có Ảnh"
-                                style="width: 300px; height: auto;" />
+                            <img src="{{ Storage::url($product->product_image) }}" class="img-thumbnail shadow-sm" alt="Ảnh"
+                                style="width: 100px; height: auto;" />
                         </td>
                         <td>
-                            {{ Str::limit($product->description, 50) }}
-                            @if (strlen($product->description) > 50)
-                                <a href="{{ route('admin.products.show', $product->id) }}" class="text-primary">Xem
-                                    Thêm</a>
-                            @endif
+                            {{ Str::limit($product->description, 30) }}
                         </td>
                         <td>
                             {{ Str::limit($product->short_description, 20) }}
-                            @if (strlen($product->short_description) > 20)
-                                <a href="{{ route('admin.products.show', $product->id) }}" class="text-primary">Xem
-                                    Thêm</a>
-                            @endif
                         </td>
                         <td>
                             @if ($product->is_active === 1)
-                                <span class="badge bg-success">Yes</span>
+                                <span class="badge badge-success px-3 py-2">Active</span>
                             @else
-                                <span class="badge bg-danger">No</span>
+                                <span class="badge badge-secondary px-3 py-2">Inactive</span>
                             @endif
                         </td>
-                        <td>{{ $product->created_at->format('Y/m/d') }}</td>
-                        <td>{{ $product->updated_at->format('Y/m/d') }}</td>
+                        <td class="small">{{ $product->created_at->format('Y/m/d') }}</td>
+                        <td class="small">{{ $product->updated_at->format('Y/m/d') }}</td>
                         <td>
-                            <a href="{{ route('admin.products.show', $product) }}" class="btn btn-info mt-2"
-                                data-bs-toggle="tooltip" title="Xem Chi Tiết">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning mt-2"
-                                data-bs-toggle="tooltip" title="Chỉnh Sửa">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            <a href="{{ route('admin.products.variants.index', $product->id) }}"
-                                class="btn btn-primary mt-2" data-bs-toggle="tooltip" title="Xem Biến Thể">
-                                <i class="bi bi-box"></i>
-                            </a>
-                            <form action="{{ route('admin.products.destroy', $product) }}" method="post" class="d-inline"
-                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger mt-2 mb-2" data-bs-toggle="tooltip"
-                                    title="Xóa">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <div class="btn-group btn-group-sm rounded shadow-sm">
+                                <a href="{{ route('admin.products.show', $product) }}" class="btn btn-info"
+                                    data-toggle="tooltip" title="Xem Chi Tiết">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning"
+                                    data-toggle="tooltip" title="Chỉnh Sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ route('admin.products.variants.index', $product->id) }}"
+                                    class="btn btn-primary" data-toggle="tooltip" title="Quản lý biến thể">
+                                    <i class="bi bi-box"></i>
+                                </a>
+                                <form action="{{ route('admin.products.destroy', $product) }}" method="post" class="d-inline"
+                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger" data-toggle="tooltip"
+                                        title="Xóa">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @endforeach

@@ -10,7 +10,24 @@
                 <div class="nonloop-block-3 owl-carousel">
                     @foreach ($featured_products as $product)
                         <div class="item">
-                            <div class="block-4 text-center">
+                            <div class="block-4 text-center border position-relative">
+                                <div class="position-absolute" style="top: 10px; right: 10px; z-index: 10;">
+                                    @auth
+                                        @php
+                                            $isFavorited = \App\Models\Favorite::where('user_id', Auth::id())->where('product_id', $product->id)->exists();
+                                        @endphp
+                                        <button type="button" 
+                                            class="btn btn-sm btn-light rounded-circle shadow-sm favorite-btn" 
+                                            data-product-id="{{ $product->id }}"
+                                            title="{{ $isFavorited ? 'Bỏ yêu thích' : 'Yêu thích' }}">
+                                            <i class="bi {{ $isFavorited ? 'bi-heart-fill text-danger' : 'bi-heart text-muted' }}"></i>
+                                        </button>
+                                    @else
+                                        <a href="{{ route('login') }}" class="btn btn-sm btn-light rounded-circle shadow-sm" title="Đăng nhập để yêu thích">
+                                            <i class="bi bi-heart text-muted"></i>
+                                        </a>
+                                    @endauth
+                                </div>
                                 <figure class="block-4-image">
                                     <a href="{{ route('client.shop-single', $product->id) }}">
                                         <img src="{{ Storage::url($product->product_image) }}" alt="Image placeholder"

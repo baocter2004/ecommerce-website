@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -37,20 +38,39 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         try {
-            $data = $request->except('product_image');
+            DB::beginTransaction();
+
+            $data = $request->except(['product_image', 'variant_name', 'variant_options']);
 
             if ($request->hasFile('product_image')) {
                 $data['product_image'] = Storage::put('products', $request->file('product_image'));
             }
 
-            Product::query()->create($data);
+            $product = Product::query()->create($data);
+
+            if ($request->filled('variant_name') && $request->has('variant_options')) {
+                $variant = $product->variants()->create([
+                    'name' => $request->variant_name
+                ]);
+
+                foreach ($request->variant_options as $option) {
+                    if (!empty($option['option'])) {
+                        $variant->options()->create([
+                            'option' => $option['option'],
+                            'price_modifier' => $option['price_modifier'] ?? 0
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
 
             return redirect()
                 ->route('admin.products.index')
                 ->with('success', true);
         } catch (\Throwable $th) {
-            // return back()->withErrors($th->getMessage());
-            return back()->with('success', false);
+            DB::rollBack();
+            return back()->with('success', false)->withErrors($th->getMessage());
         }
     }
 
@@ -79,7 +99,9 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         try {
-            $data = $request->except('product_image');
+            DB::beginTransaction();
+
+            $data = $request->except(['product_image', 'variant_name', 'variant_options']);
 
             $data['is_active'] = isset($data['is_active']) ?  $data['is_active'] : 0;
 
@@ -91,20 +113,40 @@ class ProductController extends Controller
 
             $product->update($data);
 
-            if (
-                $request->hasFile('product_image')
-                && !empty($oldImage)
-                && Storage::exists($oldImage)
-            ) {
+            if ($request->hasFile('product_image') && !empty($oldImage) && Storage::exists($oldImage)) {
                 Storage::delete($oldImage);
             }
+
+            // Sync Variants (Simple approach: replace if new variants are provided)
+            if ($request->filled('variant_name')) {
+                // Delete old variants and their options
+                foreach ($product->variants as $v) {
+                    $v->options()->delete();
+                    $v->delete();
+                }
+
+                $variant = $product->variants()->create([
+                    'name' => $request->variant_name
+                ]);
+
+                foreach ($request->variant_options as $option) {
+                    if (!empty($option['option'])) {
+                        $variant->options()->create([
+                            'option' => $option['option'],
+                            'price_modifier' => $option['price_modifier'] ?? 0
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
 
             return redirect()
                 ->route('admin.products.edit', $product)
                 ->with('success', true);
         } catch (\Throwable $th) {
-            // return back()->withErrors($th->getMessage());
-            return back()->with('success', false);
+            DB::rollBack();
+            return back()->with('success', false)->withErrors($th->getMessage());
         }
     }
 

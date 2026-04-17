@@ -19,8 +19,10 @@ class CartController extends Controller
             ? Cart::where('user_id', Auth::user()->id)->first()
             : Cart::where('session_id', session()->getId())->first();
 
-        // Lấy các sản phẩm trong giỏ hàng
-        $cart_items = $cart ? $cart->items : [];
+        // Lấy các sản phẩm trong giỏ hàng và eager load relationships
+        $cart_items = $cart 
+            ? $cart->items()->with(['product', 'variant', 'variantOption'])->get() 
+            : collect();
 
         return view('client.cart', compact('cart_items'));
     }

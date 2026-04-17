@@ -4,110 +4,284 @@
 @endsection
 
 @section('content')
-    @if (session()->has('success'))
-        <div class="alert alert-primary">
-            <h1>Thao Tác Thành Công</h1>
-        </div>
-    @endif
-    <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-        <div class="row">
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="product_name" class="form-label">Product Name</label>
-                <input type="text" class="form-control @error('product_name') is-invalid @enderror" name="product_name"
-                    id="product_name" placeholder="Enter product name" value="{{ $product->product_name }}" />
-                @error('product_name')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
-                    </div>
-                @enderror
-            </div>
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="category_id" class="form-label">Category</label>
-                <select name="category_id" id="category_id" class="form-control @error('category_id') is-invalid @enderror">
-                    <option value="">Select Category</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category['id'] }}" @if ($product->category_id === $category['id']) selected @endif>
-                            {{ $category['name'] }}
-                        </option>
+    <div class="container-fluid">
+        @if ($errors->any())
+            <div class="alert alert-danger shadow-sm border-0">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
                     @endforeach
-
-                </select>
-                @error('category_id')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
-                    </div>
-                @enderror
+                </ul>
             </div>
-        </div>
+        @endif
 
-        <div class="row">
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="price" class="form-label">Price</label>
-                <input type="text" class="form-control @error('price') is-invalid @enderror" name="price"
-                    id="price" placeholder="Enter product price" value="{{ $product->price }}" />
-                @error('price')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
-                    </div>
-                @enderror
+        @if (session()->has('success'))
+            <div class="alert alert-success shadow-sm border-0">
+                Thao tác thành công!
             </div>
+        @endif
 
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="product_image" class="form-label">Product Image</label>
-                <input type="file" class="form-control @error('product_image') is-invalid @enderror" name="product_image"
-                    id="product_image" />
-                <img src="{{ Storage::url($product->product_image) }}" width="200px" class="img-fluid rounded-top"
-                    alt="Lỗi" />
-                @error('product_image')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
+        <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="row">
+                <!-- Left Column: Basic Info -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom-0 py-3">
+                            <h5 class="mb-0 font-weight-bold">Thông tin cơ bản</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="product_name" class="form-label">Tên sản phẩm</label>
+                                <input type="text" class="form-control @error('product_name') is-invalid @enderror"
+                                    name="product_name" id="product_name" placeholder="Nhập tên sản phẩm"
+                                    value="{{ old('product_name', $product->product_name) }}" />
+                                @error('product_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="category_id" class="form-label">Danh mục</label>
+                                    <select name="category_id" id="category_id"
+                                        class="form-control @error('category_id') is-invalid @enderror">
+                                        <option value="">Chọn danh mục</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category['id'] }}"
+                                                {{ old('category_id', $product->category_id) == $category['id'] ? 'selected' : '' }}>
+                                                {{ $category['name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="price" class="form-label">Giá bán (VND)</label>
+                                    <input type="number" class="form-control @error('price') is-invalid @enderror"
+                                        name="price" id="price" placeholder="Nhập giá sản phẩm"
+                                        value="{{ old('price', $product->price) }}" />
+                                    @error('price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="short_description" class="form-label">Mô tả ngắn</label>
+                                <textarea name="short_description" id="short_description"
+                                    class="form-control @error('short_description') is-invalid @enderror" rows="2"
+                                    placeholder="Nhập mô tả ngắn">{{ old('short_description', $product->short_description) }}</textarea>
+                                @error('short_description')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-0">
+                                <label for="description" class="form-label">Mô tả chi tiết</label>
+                                <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror"
+                                    rows="5" placeholder="Nhập mô tả chi tiết">{{ old('description', $product->description) }}</textarea>
+                                @error('description')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
-                @enderror
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror"
-                    rows="5" placeholder="Enter product description">{{ $product->description }}</textarea>
-                @error('description')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
+                    <!-- Variations Section -->
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom-0 py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 font-weight-bold">Biến thể sản phẩm</h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-option">
+                                <i class="bi bi-plus-lg"></i> Thêm lựa chọn
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            @php
+                                $firstVariant = $product->variants->first();
+                            @endphp
+                            <div class="mb-3">
+                                <label for="variant_name" class="form-label">Tên nhóm biến thể (VD: Size, Màu sắc)</label>
+                                <input type="text" class="form-control" name="variant_name" id="variant_name"
+                                    placeholder="Ví dụ: Size" value="{{ old('variant_name', $firstVariant ? $firstVariant->name : '') }}">
+                            </div>
+
+                            <div id="variant-options-container">
+                                @if ($firstVariant && $firstVariant->options->count() > 0)
+                                    @foreach ($firstVariant->options as $index => $option)
+                                        <div class="row mb-2 variant-option-row">
+                                            <div class="col-md-6">
+                                                <label class="small text-muted">Giá trị</label>
+                                                <input type="text" name="variant_options[{{ $index }}][option]" class="form-control" value="{{ $option->option }}">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="small text-muted">Phụ phí</label>
+                                                <input type="number" name="variant_options[{{ $index }}][price_modifier]" class="form-control" value="{{ $option->price_modifier }}">
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button type="button" class="btn btn-outline-danger w-100 remove-option">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="row mb-2 variant-option-row">
+                                        <div class="col-md-6">
+                                            <label class="small text-muted">Giá trị</label>
+                                            <input type="text" name="variant_options[0][option]" class="form-control" placeholder="Giá trị">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted">Phụ phí</label>
+                                            <input type="number" name="variant_options[0][price_modifier]" class="form-control" value="0">
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="button" class="btn btn-outline-danger w-100 remove-option" disabled>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                @enderror
-            </div>
+                </div>
 
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="short_description" class="form-label">Short Description</label>
-                <textarea name="short_description" id="short_description"
-                    class="form-control @error('short_description') is-invalid @enderror" rows="5"
-                    placeholder="Enter short description">{{ $product->short_description }}</textarea>
-                @error('short_description')
-                    <div class="alert alert-danger mt-2">
-                        <p class="text-red">{{ $message }}</p>
+                <!-- Right Column: Images & Status -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom-0 py-3">
+                            <h5 class="mb-0 font-weight-bold">Ảnh sản phẩm</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <div class="image-preview-container border rounded mb-3 d-flex align-items-center justify-content-center bg-light"
+                                    style="height: 250px; overflow: hidden;">
+                                    <img id="image-preview" src="{{ Storage::url($product->product_image) }}" alt="Preview" class="img-fluid {{ $product->product_image ? '' : 'd-none' }}" style="max-height: 100%;">
+                                    <div id="preview-placeholder" class="{{ $product->product_image ? 'd-none' : '' }}">
+                                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                        <p class="text-muted small">Chưa có ảnh</p>
+                                    </div>
+                                </div>
+                                <input type="file" class="form-control @error('product_image') is-invalid @enderror"
+                                    name="product_image" id="product_image" accept="image/*" onchange="previewImage(this)"/>
+                                @error('product_image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
-                @enderror
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mt-3 mb-3">
-                <label for="is_active" class="form-label">Is Active</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1"
-                        @checked($product->is_active) />
-                    <label class="form-check-label" for="is_active">Activate Product</label>
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white border-bottom-0 py-3">
+                            <h5 class="mb-0 font-weight-bold">Trạng thái</h5>
+                        </div>
+                        <div class="card-body">
+                                <div class="custom-control custom-switch custom-switch-lg">
+                                    <input type="checkbox" class="custom-control-input" name="is_active" id="is_active"
+                                        value="1" {{ $product->is_active ? 'checked' : '' }}>
+                                    <label class="custom-control-label ml-2" for="is_active">Kích hoạt bán hàng</label>
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <button type="submit" class="btn btn-primary w-100 py-2 font-weight-bold">
+                                <i class="bi bi-check-circle"></i> CẬP NHẬT SẢN PHẨM
+                            </button>
+                            <a href="{{ route('admin.products.index') }}" class="btn btn-link w-100 mt-2 text-muted text-decoration-none">
+                                Quay lại danh sách
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
+    </div>
 
-        <div class="row">
-            <div class="col-12 mt-3 mb-3">
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </div>
-    </form>
+    <script>
+        // Image Preview logic
+        function previewImage(input) {
+            const preview = document.getElementById('image-preview');
+            const placeholder = document.getElementById('preview-placeholder');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Dynamic Variations logic
+        let optionIndex = {{ $firstVariant ? $firstVariant->options->count() : 1 }};
+        document.getElementById('add-option').addEventListener('click', function() {
+            const container = document.getElementById('variant-options-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'row mb-2 variant-option-row';
+            newRow.innerHTML = `
+                <div class="col-md-6">
+                    <input type="text" name="variant_options[${optionIndex}][option]" class="form-control" placeholder="Giá trị">
+                </div>
+                <div class="col-md-4">
+                    <input type="number" name="variant_options[${optionIndex}][price_modifier]" class="form-control" value="0">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-outline-danger w-100 remove-option">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRow);
+            optionIndex++;
+            toggleRemoveButtons();
+        });
+
+        document.getElementById('variant-options-container').addEventListener('click', function(e) {
+            if (e.target.closest('.remove-option')) {
+                const rows = document.querySelectorAll('.variant-option-row');
+                if (rows.length > 1) {
+                    e.target.closest('.variant-option-row').remove();
+                    toggleRemoveButtons();
+                }
+            }
+        });
+
+        function toggleRemoveButtons() {
+            const rows = document.querySelectorAll('.variant-option-row');
+            rows.forEach(row => {
+                const btn = row.querySelector('.remove-option');
+                if (rows.length === 1) {
+                    btn.setAttribute('disabled', 'disabled');
+                } else {
+                    btn.removeAttribute('disabled');
+                }
+            });
+        }
+        
+        // Initial check
+        toggleRemoveButtons();
+    </script>
+
+    <style>
+        .custom-switch-lg .form-check-input {
+            width: 3rem;
+            height: 1.5rem;
+            cursor: pointer;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .card-header {
+            border-bottom: 1px solid #f0f0f0 !important;
+        }
+    </style>
 @endsection

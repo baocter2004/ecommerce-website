@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Auth\AuthenController;
 use App\Http\Controllers\Client\CartController;
 use App\Http\Controllers\Client\ClientController;
-use App\Http\Controllers\Client\OrderController;
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
+use App\Http\Controllers\Client\WishlistController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use Illuminate\Support\Facades\Route;
 use Monolog\Handler\RotatingFileHandler;
 
@@ -41,7 +43,7 @@ Route::prefix('admin')
     ->middleware(['auth', 'isadmin'])
     ->name('admin.')
     ->group(function () {
-
+        Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Đường dẫn của CRUD users 
@@ -114,6 +116,16 @@ Route::prefix('admin')
                 Route::put('/{variant}', 'update')->name('update');
                 Route::delete('/{variant}', 'destroy')->name('destroy');
             });
+
+        // Đường dẫn quản lý Đơn hàng (Orders)
+        Route::prefix('orders')
+            ->name('orders.')
+            ->controller(AdminOrderController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/{order}', 'show')->name('show');
+                Route::put('/{order}/status', 'updateStatus')->name('updateStatus');
+            });
     });
 
 
@@ -131,11 +143,18 @@ Route::name('client.')
         // Route::patch('/cart/{cartItemId}', [CartController::class, 'updateQuantity'])->name('cart.update');
         Route::delete('/cart/{cartItemId}', [CartController::class, 'removeProduct'])->name('cart.remove');
 
-        Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
-        Route::post('/checkout', [OrderController::class, 'createOrder'])->name('order.create');
+        Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
+        Route::post('/checkout', [ClientOrderController::class, 'createOrder'])->name('order.create');
 
         Route::get('/contact', 'contact')->name('contact');
         Route::get('/about', 'about')->name('about');
         Route::get('/thankyou', 'thankyou')->name('thankyou');
         Route::get('/search', 'search')->name('search');
+
+        // Wishlist routes
+        Route::middleware('auth')->group(function () {
+            Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
+            Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+            Route::delete('/wishlist/{favorite}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+        });
     });

@@ -37,6 +37,10 @@ class StoreProductRequest extends FormRequest
                 'required',
                 Rule::exists('categories', 'id')
             ],
+            'variant_name' => 'nullable|string|max:255',
+            'variant_options' => 'nullable|array',
+            'variant_options.*.option' => 'required_with:variant_name|string|max:255',
+            'variant_options.*.price_modifier' => 'required_with:variant_name|numeric|min:0',
         ];
     }
 }

@@ -24,7 +24,14 @@ class OrderController extends Controller
     {
         $cart = $this->getCart();
 
-        if (!$cart || $cart->items->isEmpty()) {
+        if (!$cart) {
+            return redirect()->route('client.cart')->with('error', 'Giỏ hàng của bạn đang trống!');
+        }
+
+        // Eager load relationships
+        $cart->load(['items.product', 'items.variant', 'items.variantOption']);
+
+        if ($cart->items->isEmpty()) {
             return redirect()->route('client.cart')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
 
@@ -49,10 +56,8 @@ class OrderController extends Controller
             // Bắt đầu phiên giao dịch
             DB::beginTransaction();
 
-            // Tính tổng giá trị đơn hàng
-            $totalFinalPrice = $cart->items->sum(function ($item) {
-                return $item->price * $item->quantity;
-            });
+            // Tính tổng giá trị đơn hàng (price đã là tổng tiền của line item)
+            $totalFinalPrice = $cart->items->sum('price');
 
             $orderData = [
                 'user_id' => Auth::check() ? Auth::user()->id : null,

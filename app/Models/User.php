@@ -63,4 +63,9 @@ class User extends Authenticatable
     public function isMember () {
         return $this->role === self::ROLE_MEMBER;
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
 }
