@@ -151,7 +151,7 @@ Route::name('client.')
 
         Route::get('/cart', [CartController::class, 'index'])->name('cart');
         Route::post('/cart/{productId}', [CartController::class, 'addProduct'])->name('cart.add');
-        // Route::patch('/cart/{cartItemId}', [CartController::class, 'updateQuantity'])->name('cart.update');
+        Route::patch('/cart/{cartItemId}', [CartController::class, 'updateQuantity'])->name('cart.update');
         Route::delete('/cart/{cartItemId}', [CartController::class, 'removeProduct'])->name('cart.remove');
 
         Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');

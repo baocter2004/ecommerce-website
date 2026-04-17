@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\VariantOption;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
@@ -108,6 +109,69 @@ class CartController extends Controller
             return redirect()->route('client.cart')->with('success', 'Sản phẩm đã được xóa khỏi giỏ hàng');
         } catch (\Throwable $th) {
             return redirect()->route('client.cart')->with('error', 'Đã xảy ra lỗi: ' . $th->getMessage());
+        }
+    }
+
+    public function updateQuantity(Request $request, $cartItemId)
+    {
+        try {
+            $data = $request->validate([
+                'quantity' => ['required', 'integer', 'min:1'],
+            ]);
+
+            $cart = Auth::check()
+                ? Cart::where('user_id', Auth::user()->id)->first()
+                : Cart::where('session_id', session()->getId())->first();
+
+            if (!$cart) {
+                return response()->json(['message' => 'Giỏ hàng không tồn tại.'], 404);
+            }
+
+            $cartItem = $cart->items()
+                ->with(['product', 'variantOption'])
+                ->where('id', $cartItemId)
+                ->first();
+
+            if (!$cartItem) {
+                return response()->json(['message' => 'Sản phẩm trong giỏ hàng không tồn tại.'], 404);
+            }
+
+            $requestedQty = (int) $data['quantity'];
+            $variantOption = $cartItem->variantOption;
+
+            if ($variantOption && $requestedQty > (int) $variantOption->quantity) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Số lượng sản phẩm trong kho không đủ. Hiện chỉ còn ' . $variantOption->quantity . ' sản phẩm.',
+                ]);
+            }
+
+            $product = $cartItem->product;
+            $priceModifier = $variantOption ? (float) $variantOption->price_modifier : 0;
+            $unitPrice = ((float) $product->price) + $priceModifier;
+            $linePrice = $unitPrice * $requestedQty;
+
+            $cartItem->update([
+                'quantity' => $requestedQty,
+                'price' => $linePrice,
+            ]);
+
+            $subtotal = (float) $cart->items()->sum('price');
+
+            return response()->json([
+                'cart_item_id' => (int) $cartItem->id,
+                'quantity' => (int) $cartItem->quantity,
+                'line_price' => (float) $cartItem->price,
+                'subtotal' => $subtotal,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi khi cập nhật số lượng.',
+            ], 500);
         }
     }
 }

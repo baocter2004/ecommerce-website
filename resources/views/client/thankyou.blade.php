@@ -28,4 +28,14 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            (function () {
+                try {
+                    localStorage.removeItem('cart_quantities_v1');
+                } catch (e) {}
+            })();
+        </script>
+    @endpush
 @endsection

@@ -49,10 +49,13 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{{ number_format($item->price, 0, ',', '.') }} VND</td>
+                                            @php
+                                                $unitPrice = $item->quantity > 0 ? ($item->price / $item->quantity) : $item->price;
+                                            @endphp
+                                            <td>{{ number_format($unitPrice, 0, ',', '.') }} VND</td>
                                             <td>x{{ $item->quantity }}</td>
                                             <td class="text-right px-4 font-weight-bold">
-                                                {{ number_format($item->price * $item->quantity, 0, ',', '.') }} VND
+                                                {{ number_format($item->price, 0, ',', '.') }} VND
                                             </td>
                                         </tr>
                                     @endforeach
@@ -61,7 +64,7 @@
                                     <tr>
                                         <td colspan="4" class="text-right font-weight-bold px-4 pt-3">TỔNG CỘNG:</td>
                                         <td class="text-right px-4 font-weight-bold text-primary h5 pt-3 mb-0">
-                                            {{ number_format($order->total_price, 0, ',', '.') }} VND
+                                            {{ number_format($order->items->sum('price'), 0, ',', '.') }} VND
                                         </td>
                                     </tr>
                                 </tfoot>
