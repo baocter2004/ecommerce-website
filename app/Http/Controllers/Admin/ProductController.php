@@ -45,7 +45,8 @@ class ProductController extends Controller
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             if ($request->hasFile('product_image')) {
-                $data['product_image'] = Storage::put('products', $request->file('product_image'));
+                // Sử dụng disk('public') để đảm bảo ảnh lưu vào storage/app/public/products
+                $data['product_image'] = Storage::disk('public')->put('products', $request->file('product_image'));
             }
 
             $product = Product::query()->create($data);
@@ -158,15 +159,16 @@ class ProductController extends Controller
             $data['is_active'] = isset($data['is_active']) ?  $data['is_active'] : 0;
 
             if ($request->hasFile('product_image')) {
-                $data['product_image'] = Storage::put('/products',  $request->file('product_image'));
+                // Sử dụng disk('public') để đảm bảo ảnh lưu vào storage/app/public/products
+                $data['product_image'] = Storage::disk('public')->put('products', $request->file('product_image'));
             }
 
             $oldImage = $product->product_image;
 
             $product->update($data);
 
-            if ($request->hasFile('product_image') && !empty($oldImage) && Storage::exists($oldImage)) {
-                Storage::delete($oldImage);
+            if ($request->hasFile('product_image') && !empty($oldImage) && Storage::disk('public')->exists($oldImage)) {
+                Storage::disk('public')->delete($oldImage);
             }
 
             // Sync Variants (Simple approach: replace if new variants are provided)

@@ -28,10 +28,12 @@ class CategorySeeder extends Seeder
 
         foreach ($categories as $cat) {
             $sourcePath = public_path($cat['source']);
-            $finalPath = $cat['source']; // Fallback
+            $fileName = basename($cat['source']);
+            $finalPath = 'categories/' . $fileName;
 
             if (File::exists($sourcePath)) {
-                $finalPath = Storage::putFile('categories', new \Illuminate\Http\File($sourcePath));
+                // Sử dụng put thay vì putFile để giữ nguyên tên file
+                Storage::put($finalPath, file_get_contents($sourcePath));
             }
 
             Category::create([

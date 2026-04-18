@@ -27,6 +27,7 @@
                             <thead class="bg-light text-dark">
                                 <tr>
                                     <th class="border-0">ID</th>
+                                    <th class="border-0">Ảnh</th>
                                     <th class="border-0">Tên danh mục</th>
                                     <th class="border-0">Trạng thái</th>
                                     <th class="border-0">Ngày tạo</th>
@@ -38,6 +39,16 @@
                                 @forelse ($categories as $category)
                                     <tr>
                                         <td class="font-weight-bold">#{{ $category->id }}</td>
+                                        <td>
+                                            @if($category->category_image)
+                                                <img src="{{ Storage::url($category->category_image) }}" 
+                                                     alt="{{ $category->name }}" 
+                                                     class="rounded border shadow-sm"
+                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                            @else
+                                                <span class="text-muted small">Không có ảnh</span>
+                                            @endif
+                                        </td>
                                         <td>{{ $category->name }}</td>
                                         <td>
                                             @if ($category->is_active === 1)
