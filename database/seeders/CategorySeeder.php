@@ -32,8 +32,8 @@ class CategorySeeder extends Seeder
             $finalPath = 'categories/' . $fileName;
 
             if (File::exists($sourcePath)) {
-                // Sử dụng put thay vì putFile để giữ nguyên tên file
-                Storage::put($finalPath, file_get_contents($sourcePath));
+                // Sử dụng disk('public') để vào đúng thư mục storage/app/public/categories
+                Storage::disk('public')->put($finalPath, file_get_contents($sourcePath));
             }
 
             Category::create([
