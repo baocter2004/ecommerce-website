@@ -21,7 +21,7 @@ class StoreProductRequest extends FormRequest
             "product_image" => 'required|image|max:2048',
             "description" => 'required',
             "short_description" => 'required',
-            "quantity" => 'nullable|integer|min:0',
+            "quantity" => 'required|integer|min:0',
             "is_active" => [
                 'nullable',
                 Rule::in([0,1])

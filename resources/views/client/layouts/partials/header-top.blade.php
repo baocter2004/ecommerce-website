@@ -80,6 +80,12 @@
                                 <span class="count">{{ $cartCount }}</span>
                             </a>
                         </li>
+
+                        <li class="list-unstyled mx-2">
+                            <a href="{{  route('client.orders') }}" class="site-cart text-dark position-relative d-inline-block" style="line-height: 1;">
+                                <i class="bi bi-list-check h4 mb-0"></i>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>

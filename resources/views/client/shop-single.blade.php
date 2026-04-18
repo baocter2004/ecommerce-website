@@ -91,9 +91,18 @@
                                 @endif
                             </div>
                         @endif
+
+                        <div id="combo-stock-display" class="mt-2" style="display: none;">
+                            <small class="text-success font-weight-bold">
+                                Còn lại: <span id="combo-stock-value">0</span> sản phẩm
+                            </small>
+                        </div>
+                        <div id="combo-out-of-stock" class="mt-2" style="display: none;">
+                            <small class="text-danger font-weight-bold">Loại này hiện đã hết hàng</small>
+                        </div>
                     </div>
 
-                    <form action="{{ route('client.cart.add', $product->id) }}" method="POST">
+                    <form action="{{ route('client.cart.add', $product->id) }}" method="POST" id="add-to-cart-form">
                         @csrf
                         <div class="mb-4">
                             @foreach ($product->variants as $variant)
@@ -310,6 +319,85 @@
             var isBasicProduct = {{ $isBasicProduct ? 'true' : 'false' }};
             var allowDefaultBasic = {{ $allowDefaultBasic ? 'true' : 'false' }};
             var basicMaxStock = parseInt('{{ (int) ($product->quantity ?? 0) }}', 10);
+            
+            // Dữ liệu combo stock
+            var comboStockData = @json($product->productVariants);
+            var addToCartBtn = document.querySelector('button[type="submit"]');
+
+            function getSelectedCombo() {
+                var selected = {};
+                var allSelected = true;
+                
+                document.querySelectorAll('.variant-group').forEach(function(group) {
+                    var name = group.querySelector('h6').textContent.replace(':', '').trim().toLowerCase();
+                    var checked = group.querySelector('input:checked');
+                    
+                    if (checked) {
+                        if (checked.value === '__basic__') return;
+                        
+                        // Lấy text hiển thị của label
+                        var label = document.querySelector(`label[for="${checked.id}"]`).textContent.split('(')[0].trim();
+                        
+                        if (name.includes('màu') || name.includes('color')) {
+                            selected.color = label;
+                        } else if (name.includes('size') || name.includes('kích')) {
+                            selected.size = label;
+                        }
+                    } else {
+                        allSelected = false;
+                    }
+                });
+                
+                return allSelected ? selected : null;
+            }
+
+            function updateStockDisplay() {
+                if (isBasicProduct || isDefaultBasicSelected()) {
+                    document.getElementById('combo-stock-display').style.display = 'none';
+                    document.getElementById('combo-out-of-stock').style.display = 'none';
+                    if (addToCartBtn) addToCartBtn.disabled = (basicMaxStock <= 0);
+                    return;
+                }
+
+                var selected = getSelectedCombo();
+                if (!selected || (Object.keys(selected).length === 0)) {
+                    document.getElementById('combo-stock-display').style.display = 'none';
+                    document.getElementById('combo-out-of-stock').style.display = 'none';
+                    return;
+                }
+
+                // Tìm combo trong mảng JSON
+                var combo = comboStockData.find(function(item) {
+                    var match = true;
+                    if (selected.color && item.color !== selected.color) match = false;
+                    if (selected.size && item.size !== selected.size) match = false;
+                    return match;
+                });
+
+                if (combo) {
+                    if (combo.stock > 0) {
+                        document.getElementById('combo-stock-display').style.display = 'block';
+                        document.getElementById('combo-out-of-stock').style.display = 'none';
+                        document.getElementById('combo-stock-value').textContent = combo.stock;
+                        if (addToCartBtn) addToCartBtn.disabled = false;
+                        
+                        // Giới hạn số lượng nhập không vượt quá kho combo
+                        var currentQty = parseInt(quantityInput.value);
+                        if (currentQty > combo.stock) {
+                            quantityInput.value = combo.stock;
+                            updatePriceDisplay();
+                        }
+                    } else {
+                        document.getElementById('combo-stock-display').style.display = 'none';
+                        document.getElementById('combo-out-of-stock').style.display = 'block';
+                        if (addToCartBtn) addToCartBtn.disabled = true;
+                    }
+                } else {
+                    // Không tìm thấy combo này (có thể do dữ liệu chưa đồng bộ)
+                    document.getElementById('combo-stock-display').style.display = 'none';
+                    document.getElementById('combo-out-of-stock').style.display = 'none';
+                }
+            }
 
             function isDefaultBasicSelected() {
                 if (!allowDefaultBasic) return false;
@@ -319,9 +407,22 @@
             function updatePriceDisplay() {
                 var quantityNumber = parseInt(quantityInput.value, 10);
                 if (isNaN(quantityNumber) || quantityNumber < 1) quantityNumber = 1;
-                if ((isBasicProduct || isDefaultBasicSelected()) && !isNaN(basicMaxStock) && basicMaxStock >= 0) {
-                    quantityNumber = Math.min(quantityNumber, Math.max(0, basicMaxStock));
-                    if (quantityNumber < 1) quantityNumber = 1;
+                
+                // Logic giới hạn số lượng
+                var maxStock = basicMaxStock;
+                var selected = getSelectedCombo();
+                if (selected && !isDefaultBasicSelected()) {
+                    var combo = comboStockData.find(function(item) {
+                        var match = true;
+                        if (selected.color && item.color !== selected.color) match = false;
+                        if (selected.size && item.size !== selected.size) match = false;
+                        return match;
+                    });
+                    if (combo) maxStock = combo.stock;
+                }
+
+                if (!isNaN(maxStock) && maxStock >= 0) {
+                    quantityNumber = Math.min(quantityNumber, Math.max(1, maxStock));
                 }
                 quantityInput.value = String(quantityNumber);
 
@@ -335,8 +436,15 @@
                 priceDisplay.textContent = total.toLocaleString('vi-VN');
             }
 
-            quantityInput.addEventListener('change', updatePriceDisplay);
-            variantOptions.forEach(opt => opt.addEventListener('change', updatePriceDisplay));
+            quantityInput.addEventListener('change', function() {
+                updatePriceDisplay();
+                updateStockDisplay();
+            });
+
+            variantOptions.forEach(opt => opt.addEventListener('change', function() {
+                updatePriceDisplay();
+                updateStockDisplay();
+            }));
 
             // Plus/Minus buttons logic
             document.querySelector('.js-detail-btn-minus').addEventListener('click', function() {
@@ -344,19 +452,35 @@
                 if (val > 1) {
                     quantityInput.value = val - 1;
                     updatePriceDisplay();
+                    updateStockDisplay();
                 }
             });
             document.querySelector('.js-detail-btn-plus').addEventListener('click', function() {
                 var val = parseInt(quantityInput.value);
                 var next = val + 1;
-                if ((isBasicProduct || isDefaultBasicSelected()) && !isNaN(basicMaxStock) && basicMaxStock >= 0) {
-                    next = Math.min(next, basicMaxStock);
+                
+                var maxStock = basicMaxStock;
+                var selected = getSelectedCombo();
+                if (selected && !isDefaultBasicSelected()) {
+                    var combo = comboStockData.find(item => {
+                        var match = true;
+                        if (selected.color && item.color !== selected.color) match = false;
+                        if (selected.size && item.size !== selected.size) match = false;
+                        return match;
+                    });
+                    if (combo) maxStock = combo.stock;
+                }
+
+                if (!isNaN(maxStock) && maxStock >= 0) {
+                    next = Math.min(next, maxStock);
                 }
                 quantityInput.value = next;
                 updatePriceDisplay();
+                updateStockDisplay();
             });
 
             updatePriceDisplay();
+            updateStockDisplay();
         });
     </script>
 @endsection

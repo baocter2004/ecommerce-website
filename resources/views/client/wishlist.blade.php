@@ -19,6 +19,15 @@
 
     <div class="site-section">
         <div class="container">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="row mb-5">
                 <div class="col-md-12">
                     <div class="site-blocks-table">
@@ -51,15 +60,14 @@
                                         </td>
                                         <td>{{ number_format($favorite->product->price, 0, ',', '.') }}đ</td>
                                         <td>
-                                            @if($firstVariant)
+                                            @if($favorite->product->variants->count() > 0)
+                                                <a href="{{ route('client.shop-single', $favorite->product->id) }}" class="btn btn-primary btn-sm">Chọn loại</a>
+                                            @else
                                                 <form action="{{ route('client.cart.add', $favorite->product->id) }}" method="POST">
                                                     @csrf
-                                                    <input type="hidden" name="option_id" value="{{ $firstVariant->id }}">
                                                     <input type="hidden" name="quantity" value="1">
                                                     <button type="submit" class="btn btn-primary btn-sm">Thêm vào giỏ</button>
                                                 </form>
-                                            @else
-                                                <a href="{{ route('client.shop-single', $favorite->product->id) }}" class="btn btn-primary btn-sm">Chọn loại</a>
                                             @endif
                                         </td>
                                         <td>

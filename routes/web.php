@@ -157,6 +157,9 @@ Route::name('client.')
         Route::get('/checkout', [ClientOrderController::class, 'checkout'])->name('checkout');
         Route::post('/checkout', [ClientOrderController::class, 'createOrder'])->name('order.create');
 
+        Route::get('/orders', [ClientOrderController::class, 'orders'])->name('orders');
+        Route::get('/orders/{id}', [ClientOrderController::class, 'show'])->name('orders.show');
+
         Route::get('/contact', 'contact')->name('contact');
         Route::get('/about', 'about')->name('about');
         Route::get('/thankyou', 'thankyou')->name('thankyou');

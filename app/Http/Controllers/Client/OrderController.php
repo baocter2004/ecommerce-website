@@ -23,6 +23,29 @@ class OrderController extends Controller
             : Cart::where('session_id', session()->getId())->latest('updated_at')->first();
     }
 
+    public function orders() {
+        $orders = Auth::check()
+            ? Order::with('items.product')->where('user_id', Auth::id())->latest()->paginate(10)
+            : Order::with('items.product')->where('session_id', session()->getId())->latest()->paginate(10);
+
+        return view('client.orders', compact('orders'));
+    }
+
+    public function show($id) {
+        $order = Order::with(['items.product', 'items.variantOption.variant'])
+            ->where('id', $id)
+            ->where(function($query) {
+                if (Auth::check()) {
+                    $query->where('user_id', Auth::id());
+                } else {
+                    $query->where('session_id', session()->getId());
+                }
+            })
+            ->firstOrFail();
+
+        return view('client.order-detail', compact('order'));
+    }
+
     public function checkout()
     {
         $cart = $this->getCart();
