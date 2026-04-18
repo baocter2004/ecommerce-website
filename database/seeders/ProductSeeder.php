@@ -54,7 +54,6 @@ class ProductSeeder extends Seeder
             $product = Product::create([
                 'category_id' => $categories->random()->id,
                 'product_name' => $pData['name'],
-                'slug' => Str::slug($pData['name']) . '-' . Str::random(5),
                 'price' => $pData['price'],
                 'product_image' => $pData['image'],
                 'description' => 'Mô tả cho ' . $pData['name'] . '. Chất liệu cao cấp, form dáng chuẩn.',
