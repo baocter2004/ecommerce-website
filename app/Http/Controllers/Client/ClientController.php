@@ -16,7 +16,7 @@ class ClientController extends Controller
             ->latest('id')
             ->limit(5)->get();
 
-        $categories = Category::get(['id', 'name', 'category_image'])->take(3);
+        $categories = Category::get(['id', 'name', 'category_image'])->latest()->paginate(10);
 
         $featured_products = $this->getFeaturedProduct(8, 'favorites');
 

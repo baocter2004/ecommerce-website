@@ -60,10 +60,12 @@
                 @foreach ($categories as $category)
                     <div class="col-sm-6 col-md-6 col-lg-4 mb-4 mb-lg-0" data-aos="fade" data-aos-delay="">
                         <div class="block-2-item">
-                            <figure class="image mb-0">
-                                <img src="{{ Storage::url($category->category_image) }}" alt="{{ $category->name }}"
-                                    class="img-fluid" style="width: 100%; height: 450px; object-fit: cover;">
-                            </figure>
+                            <a href="{{ route('client.shop', ['category_id' => $category->id]) }}">
+                                <figure class="image mb-0">
+                                    <img src="{{ Storage::url($category->category_image) }}" alt="{{ $category->name }}"
+                                        class="img-fluid" style="width: 100%; height: 450px; object-fit: cover;">
+                                </figure>
+                            </a>
                             <div class="text">
                                 <span>Collections</span>
                                 <h3>{{ $category->name }}</h3>
